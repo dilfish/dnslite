@@ -9,6 +9,7 @@ import (
 )
 
 var ErrBadQCount = errors.New("bad question count")
+var ErrNotA = errors.New("a support only")
 
 func GetIP(addr string) (string, error) {
 	arr := strings.Split(addr, ":")
@@ -35,6 +36,10 @@ func GetDNSInfo(r *dns.Msg) (name string, tp uint16, err error) {
 	}
 	name = r.Question[0].Name
 	tp = r.Question[0].Qtype
+	if tp != dns.TypeA {
+		err = ErrNotA
+		return
+	}
 	return
 }
 
@@ -76,6 +81,7 @@ func Handle() error {
 }
 
 func main() {
+	RecordMap = make(map[string][]TypeRecord)
 	HandleHTTP()
 	err := Handle()
 	if err != nil {

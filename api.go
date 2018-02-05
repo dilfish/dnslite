@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strconv"
 	"sync"
@@ -13,6 +14,10 @@ import (
 
 var ErrValExists = errors.New("no default line")
 var ErrNoSuchVal = errors.New("no such value")
+var ErrBadName = errors.New("bad name")
+var ErrBadType = errors.New("bad type")
+var ErrBadTtl = errors.New("bad ttl")
+var ErrBadValue = errors.New("bad value")
 
 type TypeRecord struct {
 	Value string
@@ -51,7 +56,20 @@ func GetRecord(name, src string, tp uint16) ([]TypeRecord, error) {
 }
 
 func AddRecord(a RecordArgs) error {
+	if a.Name == "" {
+		return ErrBadName
+	}
+	if a.Type != 1 {
+		return ErrBadType
+	}
+	if a.Ttl > 600 || a.Ttl < 1 {
+		return ErrBadTtl
+	}
+	if net.ParseIP(a.Value) == nil {
+		return ErrBadValue
+	}
 	mapLock.Lock()
+	defer mapLock.Unlock()
 	key := a.Name + strconv.Itoa(int(a.Type)) + a.Src
 	var val TypeRecord
 	val.Ttl = a.Ttl
@@ -68,7 +86,6 @@ func AddRecord(a RecordArgs) error {
 		vs = append(vs, val)
 		RecordMap[key] = vs
 	}
-	defer mapLock.Unlock()
 	return nil
 }
 
@@ -94,12 +111,12 @@ func HandleParams(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	defer r.Body.Close()
 	bt, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.Write([]byte(""))
+		w.Write([]byte("err is:" + err.Error()))
 		return err
 	}
-	return json.Unmarshal(bt, v)
+	err = json.Unmarshal(bt, v)
 	if err != nil {
-		w.Write([]byte(""))
+		w.Write([]byte("err is:" + err.Error()))
 		return err
 	}
 	return nil
@@ -113,25 +130,42 @@ type RecordArgs struct {
 	Value string
 }
 
+type RecordRet struct {
+	Err int    `json:"err"`
+	Msg string `json:"msg"`
+}
+
 func HandleHTTP() {
 	http.HandleFunc("/api/add.record", func(w http.ResponseWriter, r *http.Request) {
+		var ret RecordRet
 		var a RecordArgs
+		ret.Msg = "ok"
 		err := HandleParams(w, r, &a)
 		if err != nil {
 			return
 		}
-		ret := AddRecord(a)
+		err = AddRecord(a)
+		if err != nil {
+			ret.Err = 1
+			ret.Msg = err.Error()
+		}
 		bt, _ := json.Marshal(ret)
 		w.Write(bt)
 		return
 	})
 	http.HandleFunc("/api/del.record", func(w http.ResponseWriter, r *http.Request) {
 		var d RecordArgs
+		var ret RecordRet
+		ret.Msg = "ok"
 		err := HandleParams(w, r, &d)
 		if err != nil {
 			return
 		}
-		ret := DelRecord(d)
+		err = DelRecord(d)
+		if err != nil {
+			ret.Err = 1
+			ret.Msg = err.Error()
+		}
 		bt, _ := json.Marshal(ret)
 		w.Write(bt)
 		return

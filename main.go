@@ -8,14 +8,7 @@ import (
 	"strings"
 )
 
-type TypeRecord struct {
-	Type  uint16
-	Value string
-	Ttl   int
-}
-
-// key: domain + type + fromIP
-var RecordMap map[string][]TypeRecord
+var ErrBadQCount = errors.New("bad question count")
 
 func GetIP(addr string) (string, error) {
 	arr := strings.Split(addr, ":")
@@ -35,22 +28,45 @@ func GetIP(addr string) (string, error) {
 	return ip.String(), nil
 }
 
+func GetDNSInfo(r *dns.Msg) (name string, tp uint16, err error) {
+	if len(r.Question) != 1 {
+		err = ErrBadQCount
+		return
+	}
+	name = r.Question[0].Name
+	tp = r.Question[0].Qtype
+	return
+}
+
 func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	m := new(dns.Msg)
+	name, tp, err := GetDNSInfo(r)
+	if err != nil {
+		fmt.Println("bad dns info", r, err)
+		return
+	}
+	src, err := GetIP(w.RemoteAddr().String())
+	if err != nil {
+		fmt.Println("bad remoteaddr", w.RemoteAddr())
+		return
+	}
 	m.SetReply(r)
 	m.Authoritative = true
-	rr := &dns.A{
-		Hdr: dns.RR_Header{
-			Name:   "baidu.com.",
-			Rrtype: dns.TypeA,
-			Class:  dns.ClassINET,
-			Ttl:    1,
-		},
-		A: net.ParseIP("1.1.1.1").To4(),
+	rr, err := GetRecord(name, src, tp)
+	if err != nil {
+		fmt.Println("get record", name, src, tp, err)
+		return
 	}
-	m.Answer = []dns.RR{rr}
+	for _, r := range rr {
+		a := new(dns.A)
+		a.Hdr.Name = name
+		a.Hdr.Rrtype = tp
+		a.Hdr.Class = dns.ClassINET
+		a.Hdr.Ttl = r.Ttl
+		a.A = net.ParseIP(r.Value).To4()
+		m.Answer = append(m.Answer, a)
+	}
 	w.WriteMsg(m)
-	fmt.Println(w.RemoteAddr())
 }
 
 func Handle() error {

@@ -20,8 +20,13 @@ var ErrBadTtl = errors.New("bad ttl")
 var ErrBadValue = errors.New("bad value")
 
 type TypeRecord struct {
-	Value string
-	Ttl   uint32
+	Value string `json:"value"`
+	Ttl   uint32 `json:"ttl"`
+}
+
+type RecordInfo struct {
+	TypeRecord
+	Name string `json:"name"`
 }
 
 // key: domain + type + fromIP
@@ -39,16 +44,27 @@ func RunHTTP() {
 	}
 }
 
-func GetRecord(name, src string, tp uint16) ([]TypeRecord, error) {
+func ListRecord() []RecordInfo {
+	rs := make([]RecordInfo, 0)
+	var r RecordInfo
 	mapLock.Lock()
 	defer mapLock.Unlock()
-	defKey := name + strconv.Itoa(int(tp))
-	realKey := name + strconv.Itoa(int(tp)) + src
-	vs, ok := RecordMap[realKey]
-	if ok == true {
-		return vs, nil
+	for k, vs := range RecordMap {
+		r.Name = k
+		for _, v := range vs {
+			r.Value = v.Value
+			r.Ttl = v.Ttl
+			rs = append(rs, r)
+		}
 	}
-	vs, ok = RecordMap[defKey]
+	return rs
+}
+
+func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
+	mapLock.Lock()
+	defer mapLock.Unlock()
+	key := name + strconv.Itoa(int(tp))
+	vs, ok := RecordMap[key]
 	if ok == true {
 		return vs, nil
 	}
@@ -68,42 +84,13 @@ func AddRecord(a RecordArgs) error {
 	if net.ParseIP(a.Value) == nil {
 		return ErrBadValue
 	}
-	mapLock.Lock()
-	defer mapLock.Unlock()
-	key := a.Name + strconv.Itoa(int(a.Type)) + a.Src
+	key := a.Name + strconv.Itoa(int(a.Type))
 	var val TypeRecord
 	val.Ttl = a.Ttl
 	val.Value = a.Value
-	vs, ok := RecordMap[key]
-	if ok == false {
-		RecordMap[key] = []TypeRecord{val}
-	} else {
-		for _, v := range vs {
-			if v.Value == a.Value {
-				return ErrValExists
-			}
-		}
-		vs = append(vs, val)
-		RecordMap[key] = vs
-	}
-	return nil
-}
-
-func DelRecord(d RecordArgs) error {
 	mapLock.Lock()
-	key := d.Name + strconv.Itoa(int(d.Type)) + d.Src
-	vs, ok := RecordMap[key]
-	if ok == false {
-		return ErrNoSuchVal
-	}
-	nv := make([]TypeRecord, 0)
-	for _, val := range vs {
-		if val.Value != d.Value {
-			nv = append(nv, val)
-		}
-	}
-	RecordMap[key] = nv
 	defer mapLock.Unlock()
+	RecordMap[key] = []TypeRecord{val}
 	return nil
 }
 
@@ -123,11 +110,10 @@ func HandleParams(w http.ResponseWriter, r *http.Request, v interface{}) error {
 }
 
 type RecordArgs struct {
-	Name  string
-	Type  uint16
-	Src   string
-	Ttl   uint32
-	Value string
+	Name  string `json:"name"`
+	Type  uint16 `json:"type"`
+	Ttl   uint32 `json:"ttl"`
+	Value string `json:"value"`
 }
 
 type RecordRet struct {
@@ -153,20 +139,9 @@ func HandleHTTP() {
 		w.Write(bt)
 		return
 	})
-	http.HandleFunc("/api/del.record", func(w http.ResponseWriter, r *http.Request) {
-		var d RecordArgs
-		var ret RecordRet
-		ret.Msg = "ok"
-		err := HandleParams(w, r, &d)
-		if err != nil {
-			return
-		}
-		err = DelRecord(d)
-		if err != nil {
-			ret.Err = 1
-			ret.Msg = err.Error()
-		}
-		bt, _ := json.Marshal(ret)
+	http.HandleFunc("/api/list.record", func(w http.ResponseWriter, r *http.Request) {
+		l := ListRecord()
+		bt, _ := json.Marshal(l)
 		w.Write(bt)
 		return
 	})

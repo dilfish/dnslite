@@ -6,6 +6,7 @@ import (
 	"github.com/miekg/dns"
 	"net"
 	"strings"
+	"time"
 )
 
 var ErrBadQCount = errors.New("bad question count")
@@ -44,10 +45,11 @@ func GetDNSInfo(r *dns.Msg) (name string, tp uint16, err error) {
 }
 
 func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
+	fmt.Println(time.Now(), w.RemoteAddr(), r.Question)
 	m := new(dns.Msg)
 	name, tp, err := GetDNSInfo(r)
 	if err != nil {
-		fmt.Println("bad dns info", r, err)
+		fmt.Println(time.Now(), "bad dns info", r, err)
 		return
 	}
 	src, err := GetIP(w.RemoteAddr().String())
@@ -57,7 +59,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	}
 	m.SetReply(r)
 	m.Authoritative = true
-	rr, err := GetRecord(name, src, tp)
+	rr, err := GetRecord(name, tp)
 	if err != nil {
 		fmt.Println("get record", name, src, tp, err)
 		return

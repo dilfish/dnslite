@@ -12,29 +12,29 @@ import (
 	"time"
 )
 
-var ErrValExists = errors.New("no default line")
-var ErrNoSuchVal = errors.New("no such value")
-var ErrBadName = errors.New("bad name")
-var ErrBadType = errors.New("bad type")
-var ErrBadTtl = errors.New("bad ttl")
-var ErrBadValue = errors.New("bad value")
+var errValExists = errors.New("no default line")
+var errNoSuchVal = errors.New("no such value")
+var errBadName = errors.New("bad name")
+var errBadType = errors.New("bad type")
+var errBadTTL = errors.New("bad ttl")
+var errBadValue = errors.New("bad value")
 
-type TypeRecord struct {
+type typeRecord struct {
 	Value string `json:"value"`
-	Ttl   uint32 `json:"ttl"`
+	TTL   uint32 `json:"ttl"`
 }
 
-type RecordInfo struct {
-	TypeRecord
+type recordInfo struct {
+	typeRecord
 	Name string `json:"name"`
 }
 
 // key: domain + type + fromIP
-var RecordMap map[string][]TypeRecord
+var recordMap map[string][]typeRecord
 
 var mapLock sync.Mutex
 
-func RunHTTP() {
+func runHTTP() {
 	for {
 		err := http.ListenAndServe("127.0.0.1:8083", nil)
 		if err != nil {
@@ -44,57 +44,57 @@ func RunHTTP() {
 	}
 }
 
-func ListRecord() []RecordInfo {
-	rs := make([]RecordInfo, 0)
-	var r RecordInfo
+func listRecord() []recordInfo {
+	rs := make([]recordInfo, 0)
+	var r recordInfo
 	mapLock.Lock()
 	defer mapLock.Unlock()
-	for k, vs := range RecordMap {
+	for k, vs := range recordMap {
 		r.Name = k
 		for _, v := range vs {
 			r.Value = v.Value
-			r.Ttl = v.Ttl
+			r.TTL = v.TTL
 			rs = append(rs, r)
 		}
 	}
 	return rs
 }
 
-func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
+func getRecord(name string, tp uint16) ([]typeRecord, error) {
 	mapLock.Lock()
 	defer mapLock.Unlock()
 	key := name + strconv.Itoa(int(tp))
-	vs, ok := RecordMap[key]
+	vs, ok := recordMap[key]
 	if ok == true {
 		return vs, nil
 	}
-	return nil, ErrNoSuchVal
+	return nil, errNoSuchVal
 }
 
-func AddRecord(a RecordArgs) error {
+func addRecord(a recordArgs) error {
 	if a.Name == "" {
-		return ErrBadName
+		return errBadName
 	}
 	if a.Type != 1 {
-		return ErrBadType
+		return errBadType
 	}
-	if a.Ttl > 600 || a.Ttl < 1 {
-		return ErrBadTtl
+	if a.TTL > 600 || a.TTL < 1 {
+		return errBadTTL
 	}
 	if net.ParseIP(a.Value) == nil {
-		return ErrBadValue
+		return errBadValue
 	}
 	key := a.Name + strconv.Itoa(int(a.Type))
-	var val TypeRecord
-	val.Ttl = a.Ttl
+	var val typeRecord
+	val.TTL = a.TTL
 	val.Value = a.Value
 	mapLock.Lock()
 	defer mapLock.Unlock()
-	RecordMap[key] = []TypeRecord{val}
+	recordMap[key] = []typeRecord{val}
 	return nil
 }
 
-func HandleParams(w http.ResponseWriter, r *http.Request, v interface{}) error {
+func handleParams(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	defer r.Body.Close()
 	bt, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -109,28 +109,28 @@ func HandleParams(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	return nil
 }
 
-type RecordArgs struct {
+type recordArgs struct {
 	Name  string `json:"name"`
 	Type  uint16 `json:"type"`
-	Ttl   uint32 `json:"ttl"`
+	TTL   uint32 `json:"ttl"`
 	Value string `json:"value"`
 }
 
-type RecordRet struct {
+type recordRet struct {
 	Err int    `json:"err"`
 	Msg string `json:"msg"`
 }
 
-func HandleHTTP() {
+func handleHTTP() {
 	http.HandleFunc("/api/add.record", func(w http.ResponseWriter, r *http.Request) {
-		var ret RecordRet
-		var a RecordArgs
+		var ret recordRet
+		var a recordArgs
 		ret.Msg = "ok"
-		err := HandleParams(w, r, &a)
+		err := handleParams(w, r, &a)
 		if err != nil {
 			return
 		}
-		err = AddRecord(a)
+		err = addRecord(a)
 		if err != nil {
 			ret.Err = 1
 			ret.Msg = err.Error()
@@ -140,10 +140,10 @@ func HandleHTTP() {
 		return
 	})
 	http.HandleFunc("/api/list.record", func(w http.ResponseWriter, r *http.Request) {
-		l := ListRecord()
+		l := listRecord()
 		bt, _ := json.Marshal(l)
 		w.Write(bt)
 		return
 	})
-	go RunHTTP()
+	go runHTTP()
 }

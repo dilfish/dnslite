@@ -3,16 +3,17 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/miekg/dns"
 	"net"
 	"strings"
 	"time"
+
+	"github.com/miekg/dns"
 )
 
-var ErrBadQCount = errors.New("bad question count")
-var ErrNotA = errors.New("a support only")
+var errBadQCount = errors.New("bad question count")
+var errNotA = errors.New("a support only")
 
-func GetIP(addr string) (string, error) {
+func getIP(addr string) (string, error) {
 	arr := strings.Split(addr, ":")
 	if len(arr) != 2 {
 		fmt.Println("bad format addr", addr)
@@ -30,15 +31,15 @@ func GetIP(addr string) (string, error) {
 	return ip.String(), nil
 }
 
-func GetDNSInfo(r *dns.Msg) (name string, tp uint16, err error) {
+func getDNSInfo(r *dns.Msg) (name string, tp uint16, err error) {
 	if len(r.Question) != 1 {
-		err = ErrBadQCount
+		err = errBadQCount
 		return
 	}
 	name = r.Question[0].Name
 	tp = r.Question[0].Qtype
 	if tp != dns.TypeA {
-		err = ErrNotA
+		err = errNotA
 		return
 	}
 	return
@@ -47,19 +48,19 @@ func GetDNSInfo(r *dns.Msg) (name string, tp uint16, err error) {
 func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	fmt.Println(time.Now(), w.RemoteAddr(), r.Question)
 	m := new(dns.Msg)
-	name, tp, err := GetDNSInfo(r)
+	name, tp, err := getDNSInfo(r)
 	if err != nil {
 		fmt.Println(time.Now(), "bad dns info", r, err)
 		return
 	}
-	src, err := GetIP(w.RemoteAddr().String())
+	src, err := getIP(w.RemoteAddr().String())
 	if err != nil {
 		fmt.Println("bad remoteaddr", w.RemoteAddr())
 		return
 	}
 	m.SetReply(r)
 	m.Authoritative = true
-	rr, err := GetRecord(name, tp)
+	rr, err := getRecord(name, tp)
 	if err != nil {
 		fmt.Println("get record", name, src, tp, err)
 		return
@@ -69,23 +70,23 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 		a.Hdr.Name = name
 		a.Hdr.Rrtype = tp
 		a.Hdr.Class = dns.ClassINET
-		a.Hdr.Ttl = r.Ttl
+		a.Hdr.Ttl = r.TTL
 		a.A = net.ParseIP(r.Value).To4()
 		m.Answer = append(m.Answer, a)
 	}
 	w.WriteMsg(m)
 }
 
-func Handle() error {
+func handle() error {
 	server := &dns.Server{Addr: ":53", Net: "udp4"}
 	dns.HandleFunc(".", handleRequest)
 	return server.ListenAndServe()
 }
 
 func main() {
-	RecordMap = make(map[string][]TypeRecord)
-	HandleHTTP()
-	err := Handle()
+	recordMap = make(map[string][]typeRecord)
+	handleHTTP()
+	err := handle()
 	if err != nil {
 		fmt.Println("error is", err)
 		panic(err)

@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"strconv"
@@ -39,7 +39,7 @@ func RunHTTP() {
 		err := http.ListenAndServe("127.0.0.1:8083", nil)
 		if err != nil {
 			time.Sleep(time.Second * 5)
-			fmt.Println("listen error", err)
+			log.Println("listen error", err)
 		}
 	}
 }
@@ -74,6 +74,9 @@ func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
 func AddRecord(a RecordArgs) error {
 	if a.Name == "" {
 		return ErrBadName
+	}
+	if a.Name[len(a.Name)-1] != "." {
+		a.Name = a.Name + "."
 	}
 	if a.Type != 1 {
 		return ErrBadType

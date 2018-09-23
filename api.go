@@ -1,4 +1,4 @@
-package main
+package dnslite
 
 import (
 	"encoding/json"
@@ -19,18 +19,18 @@ var errBadType = errors.New("bad type")
 var errBadTTL = errors.New("bad ttl")
 var errBadValue = errors.New("bad value")
 
-type typeRecord struct {
+type TypeRecord struct {
 	Value string `json:"value"`
 	TTL   uint32 `json:"ttl"`
 }
 
 type recordInfo struct {
-	typeRecord
+	TypeRecord
 	Name string `json:"name"`
 }
 
 // key: domain + type + fromIP
-var recordMap map[string][]typeRecord
+var RecordMap map[string][]TypeRecord
 
 var mapLock sync.Mutex
 
@@ -49,7 +49,7 @@ func listRecord() []recordInfo {
 	var r recordInfo
 	mapLock.Lock()
 	defer mapLock.Unlock()
-	for k, vs := range recordMap {
+	for k, vs := range RecordMap {
 		r.Name = k
 		for _, v := range vs {
 			r.Value = v.Value
@@ -60,11 +60,11 @@ func listRecord() []recordInfo {
 	return rs
 }
 
-func getRecord(name string, tp uint16) ([]typeRecord, error) {
+func getRecord(name string, tp uint16) ([]TypeRecord, error) {
 	mapLock.Lock()
 	defer mapLock.Unlock()
 	key := name + strconv.Itoa(int(tp))
-	vs, ok := recordMap[key]
+	vs, ok := RecordMap[key]
 	if ok == true {
 		return vs, nil
 	}
@@ -85,12 +85,12 @@ func addRecord(a recordArgs) error {
 		return errBadValue
 	}
 	key := a.Name + strconv.Itoa(int(a.Type))
-	var val typeRecord
+	var val TypeRecord
 	val.TTL = a.TTL
 	val.Value = a.Value
 	mapLock.Lock()
 	defer mapLock.Unlock()
-	recordMap[key] = []typeRecord{val}
+	RecordMap[key] = []TypeRecord{val}
 	return nil
 }
 
@@ -121,7 +121,7 @@ type recordRet struct {
 	Msg string `json:"msg"`
 }
 
-func handleHTTP() {
+func HandleHTTP() {
 	http.HandleFunc("/api/add.record", func(w http.ResponseWriter, r *http.Request) {
 		var ret recordRet
 		var a recordArgs

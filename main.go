@@ -1,4 +1,4 @@
-package main
+package dnslite
 
 import (
 	"errors"
@@ -77,18 +77,8 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	w.WriteMsg(m)
 }
 
-func handle() error {
+func Handle() error {
 	server := &dns.Server{Addr: ":53", Net: "udp4"}
 	dns.HandleFunc(".", handleRequest)
 	return server.ListenAndServe()
-}
-
-func main() {
-	recordMap = make(map[string][]typeRecord)
-	handleHTTP()
-	err := handle()
-	if err != nil {
-		fmt.Println("error is", err)
-		panic(err)
-	}
 }

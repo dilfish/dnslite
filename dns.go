@@ -12,7 +12,7 @@ import (
 var ErrBadQCount = errors.New("bad question count")
 var ErrNotA = errors.New("a support only")
 
-func getIP(addr string) (string, error) {
+func GetIP(addr string) (string, error) {
 	arr := strings.Split(addr, ":")
 	if len(arr) != 2 {
 		log.Println("bad format addr", addr)
@@ -79,7 +79,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 		log.Println("bad dns info", err)
 		return
 	}
-	_, err = getIP(w.RemoteAddr().String())
+	_, err = GetIP(w.RemoteAddr().String())
 	if err != nil {
 		log.Println("bad remote addr", w.RemoteAddr())
 		return

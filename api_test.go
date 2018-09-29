@@ -16,7 +16,7 @@ func (d *DNSApi) Add(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 	data := []byte(r.Body.String())
 	jerr, _ := jsonparser.GetInt(data, "err")
 	jmsg, _ := jsonparser.GetString(data, "msg")
-	assert.Equal(d.t, 0, jerr)
+	assert.Equal(d.t, int64(0), jerr)
 	assert.Equal(d.t, "ok", jmsg)
 	assert.Equal(d.t, http.StatusOK, r.Code)
 }

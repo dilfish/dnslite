@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"strconv"
 	"sync"
-	"time"
 )
 
 var errValExists = errors.New("no default line")
@@ -34,16 +32,6 @@ var RecordMap map[string][]TypeRecord
 
 var mapLock sync.Mutex
 
-func runHTTP() {
-	for {
-		err := http.ListenAndServe("127.0.0.1:8083", nil)
-		if err != nil {
-			time.Sleep(time.Second * 5)
-			log.Println("listen error", err)
-		}
-	}
-}
-
 func listRecord() []recordInfo {
 	rs := make([]recordInfo, 0)
 	var r recordInfo
@@ -60,7 +48,7 @@ func listRecord() []recordInfo {
 	return rs
 }
 
-func getRecord(name string, tp uint16) ([]TypeRecord, error) {
+func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
 	mapLock.Lock()
 	defer mapLock.Unlock()
 	key := name + strconv.Itoa(int(tp))
@@ -71,7 +59,7 @@ func getRecord(name string, tp uint16) ([]TypeRecord, error) {
 	return nil, errNoSuchVal
 }
 
-func addRecord(a recordArgs) error {
+func addRecord(a RecordArgs) error {
 	if a.Name == "" {
 		return errBadName
 	}
@@ -112,41 +100,47 @@ func handleParams(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	return nil
 }
 
-type recordArgs struct {
+type RecordArgs struct {
 	Name  string `json:"name"`
 	Type  uint16 `json:"type"`
 	TTL   uint32 `json:"ttl"`
 	Value string `json:"value"`
 }
 
-type recordRet struct {
+type RecordRet struct {
 	Err int    `json:"err"`
 	Msg string `json:"msg"`
 }
 
-func HandleHTTP() {
-	http.HandleFunc("/api/add.record", func(w http.ResponseWriter, r *http.Request) {
-		var ret recordRet
-		var a recordArgs
-		ret.Msg = "ok"
-		err := handleParams(w, r, &a)
-		if err != nil {
-			return
-		}
-		err = addRecord(a)
-		if err != nil {
-			ret.Err = 1
-			ret.Msg = err.Error()
-		}
-		bt, _ := json.Marshal(ret)
-		w.Write(bt)
+func httpAddRecord(w http.ResponseWriter, r *http.Request) {
+	var ret RecordRet
+	var a RecordArgs
+	ret.Msg = "ok"
+	err := handleParams(w, r, &a)
+	if err != nil {
 		return
-	})
-	http.HandleFunc("/api/list.record", func(w http.ResponseWriter, r *http.Request) {
-		l := listRecord()
-		bt, _ := json.Marshal(l)
-		w.Write(bt)
-		return
-	})
-	go runHTTP()
+	}
+	err = addRecord(a)
+	if err != nil {
+		ret.Err = 1
+		ret.Msg = err.Error()
+	}
+	bt, _ := json.Marshal(ret)
+	w.Write(bt)
+}
+
+func httpListRecord(w http.ResponseWriter, r *http.Request) {
+	l := listRecord()
+	bt, _ := json.Marshal(l)
+	w.Write(bt)
+}
+
+func CreateHTTPMux() http.Handler {
+	if RecordMap == nil {
+		RecordMap = make(map[string][]TypeRecord)
+	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/add.record", httpAddRecord)
+	mux.HandleFunc("/api.list.record", httpListRecord)
+	return mux
 }

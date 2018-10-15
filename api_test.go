@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+    "encoding/json"
 )
 
 type DNSApi struct {
@@ -21,6 +22,22 @@ func (d *DNSApi) Add(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 	assert.Equal(d.t, http.StatusOK, r.Code)
 }
 
+func (d *DNSApi) List (r gofight.HTTPResponse, rq gofight.HTTPRequest) {
+    ris := make([]RecordInfo, 0)
+    err := json.Unmarshal([]byte(r.Body.String()), &ris)
+    if err != nil {
+        d.t.Error("unjson", err)
+        return
+    }
+    if len(ris) != 1 {
+        d.t.Error("ris is", len(ris))
+        return
+    }
+    if ris[0].Name != "sub.ns.libsm.com.1" || ris[0].Value != "1.1.1.1" || ris[0].TTL != 5 {
+        d.t.Error("values error", ris[0])
+    }
+}
+
 func TestCreateHTTPMux(t *testing.T) {
 	mux := CreateHTTPMux()
 	r := gofight.New()
@@ -33,4 +50,5 @@ func TestCreateHTTPMux(t *testing.T) {
 			"ttl":   5,
 			"value": "1.1.1.1",
 		}).SetDebug(true).Run(mux, d.Add)
+    r.POST("/api/list.record").SetDebug(true).Run(mux, d.List)
 }

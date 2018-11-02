@@ -22,7 +22,7 @@ type TypeRecord struct {
 	TTL   uint32 `json:"ttl"`
 }
 
-type recordInfo struct {
+type RecordInfo struct {
 	TypeRecord
 	Name string `json:"name"`
 }
@@ -32,9 +32,9 @@ var RecordMap map[string][]TypeRecord
 
 var mapLock sync.Mutex
 
-func listRecord() []recordInfo {
-	rs := make([]recordInfo, 0)
-	var r recordInfo
+func listRecord() []RecordInfo {
+	rs := make([]RecordInfo, 0)
+	var r RecordInfo
 	mapLock.Lock()
 	defer mapLock.Unlock()
 	for k, vs := range RecordMap {
@@ -141,6 +141,6 @@ func CreateHTTPMux() http.Handler {
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/add.record", httpAddRecord)
-	mux.HandleFunc("/api.list.record", httpListRecord)
+	mux.HandleFunc("/api/list.record", httpListRecord)
 	return mux
 }

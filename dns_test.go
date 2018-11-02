@@ -58,4 +58,29 @@ func TestCreateDNSMux(t *testing.T) {
 	if len(w.b) == 0 && len(w.m) == 0 {
 		t.Error("return nil")
 	}
+    m.Question = make([]dns.Question, 2)
+    m.Question[0] = dns.Question{"sub.ns.libsm.com.", dns.TypeA, dns.ClassINET}
+    m.Question[1] = dns.Question{"sub.ns.libsm.com.", dns.TypeA, dns.ClassINET}
+    mux.ServeDNS(&w, &m)
+    if len(w.b) != 0 {
+        t.Error("return good")
+    }
+    m.Question = make([]dns.Question, 1)
+	m.Question[0] = dns.Question{"baidu.com.", dns.TypeA, dns.ClassINET}
+	mux.ServeDNS(&w, &m)
+	if len(w.b) != 0 {
+		t.Error("return good with no such name")
+	}
+    m.Question = make([]dns.Question, 1)
+	m.Question[0] = dns.Question{"sub.ns.libsm.com.", dns.TypeNS, dns.ClassINET}
+	mux.ServeDNS(&w, &m)
+	if len(w.m) == 0 {
+		t.Error("return good with ns")
+	}
+    m.Question = make([]dns.Question, 1)
+	m.Question[0] = dns.Question{"sub.ns.libsm.com.", dns.TypeMX, dns.ClassINET}
+	mux.ServeDNS(&w, &m)
+	if len(w.b) != 0 {
+		t.Error("return good with mx")
+	}
 }

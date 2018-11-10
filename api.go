@@ -25,7 +25,7 @@ type TypeRecord struct {
 	TTL   uint32 `json:"ttl"`
 }
 
-// RecordType fills typerecord and name of a domain
+// RecordInfo fills typerecord and name of a domain
 type RecordInfo struct {
 	TypeRecord
 	Name string `json:"name"`

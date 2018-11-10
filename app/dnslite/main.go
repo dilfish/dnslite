@@ -1,3 +1,5 @@
+// Copyright 2018 Sean.ZH
+
 package main
 
 import (
@@ -6,6 +8,7 @@ import (
 	"net/http"
 )
 
+// UpDNS create new dns service
 func UpDNS() {
 	mux := dnslite.CreateDNSMux()
 	server := &dns.Server{Addr: "53", Net: "udp4"}

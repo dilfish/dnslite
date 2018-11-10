@@ -1,3 +1,5 @@
+// Copyright 2018 Sean.ZH
+
 package dnslite
 
 import (
@@ -17,23 +19,25 @@ var errBadType = errors.New("bad type")
 var errBadTTL = errors.New("bad ttl")
 var errBadValue = errors.New("bad value")
 
+// TypeRecord reprents a record value and ttl
 type TypeRecord struct {
 	Value string `json:"value"`
 	TTL   uint32 `json:"ttl"`
 }
 
+// RecordType fills typerecord and name of a domain
 type RecordInfo struct {
 	TypeRecord
 	Name string `json:"name"`
 }
 
-// key: domain + type + fromIP
+// RecordMap holds key: domain + type + fromIP
 var RecordMap map[string][]TypeRecord
 
 var mapLock sync.Mutex
 
 func listRecord() []RecordInfo {
-	rs := make([]RecordInfo, 0)
+    var rs []RecordInfo
 	var r RecordInfo
 	mapLock.Lock()
 	defer mapLock.Unlock()
@@ -48,6 +52,7 @@ func listRecord() []RecordInfo {
 	return rs
 }
 
+// GetRecord returns an certain name and type value to client
 func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
 	mapLock.Lock()
 	defer mapLock.Unlock()
@@ -100,6 +105,7 @@ func handleParams(w http.ResponseWriter, r *http.Request, v interface{}) error {
 	return nil
 }
 
+// RecordArgs would be send when calls api
 type RecordArgs struct {
 	Name  string `json:"name"`
 	Type  uint16 `json:"type"`
@@ -107,6 +113,7 @@ type RecordArgs struct {
 	Value string `json:"value"`
 }
 
+// RecordRet is the response
 type RecordRet struct {
 	Err int    `json:"err"`
 	Msg string `json:"msg"`
@@ -135,6 +142,8 @@ func httpListRecord(w http.ResponseWriter, r *http.Request) {
 	w.Write(bt)
 }
 
+// CreateHTTPMux create http service handler
+// for dnslite
 func CreateHTTPMux() http.Handler {
 	if RecordMap == nil {
 		RecordMap = make(map[string][]TypeRecord)

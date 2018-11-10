@@ -1,3 +1,5 @@
+// Copyright 2018 Sean.ZH
+
 package dnslite
 
 import (
@@ -8,9 +10,12 @@ import (
 	"github.com/miekg/dns"
 )
 
+// ErrBadQCount is more than 1 question count
 var ErrBadQCount = errors.New("bad question count")
+// ErrNotA only supports A record
 var ErrNotA = errors.New("a support only")
 
+// ExtraInfo fills dns cookie and subnet
 type ExtraInfo struct {
 	Cookie string
 	Subnet string
@@ -83,6 +88,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	w.WriteMsg(m)
 }
 
+// CreateDNSMux create mux for dns like http
 func CreateDNSMux() *dns.ServeMux {
 	mux := dns.NewServeMux()
 	mux.HandleFunc(".", handleRequest)

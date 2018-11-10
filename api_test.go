@@ -1,3 +1,5 @@
+// Copyright 2018 Sean.ZH
+
 package dnslite
 
 import (
@@ -23,7 +25,7 @@ func (d *DNSApi) Add(r gofight.HTTPResponse, rq gofight.HTTPRequest) {
 }
 
 func (d *DNSApi) List (r gofight.HTTPResponse, rq gofight.HTTPRequest) {
-    ris := make([]RecordInfo, 0)
+    var ris []RecordInfo
     err := json.Unmarshal([]byte(r.Body.String()), &ris)
     if err != nil {
         d.t.Error("unjson", err)

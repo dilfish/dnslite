@@ -12,6 +12,7 @@ import (
 
 // ErrBadQCount is more than 1 question count
 var ErrBadQCount = errors.New("bad question count")
+
 // ErrNotA only supports A record
 var ErrNotA = errors.New("a support only")
 
@@ -30,7 +31,7 @@ func getDNSInfo(r *dns.Msg) (name string, tp uint16, ex ExtraInfo, err error) {
 	log.Println("extra is", r.Extra)
 	name = r.Question[0].Name
 	tp = r.Question[0].Qtype
-	if tp != dns.TypeA && tp != dns.TypeNS {
+	if tp != dns.TypeA && tp != dns.TypeNS && tp != dns.TypeAAAA {
 		err = ErrNotA
 		log.Println("r.q.type is not A", tp)
 		return
@@ -76,14 +77,27 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 		log.Println("get record error", name, tp, err)
 		return
 	}
-	for _, r := range rr {
-		a := new(dns.A)
-		a.Hdr.Name = name
-		a.Hdr.Rrtype = tp
-		a.Hdr.Class = dns.ClassINET
-		a.Hdr.Ttl = r.TTL
-		a.A = net.ParseIP(r.Value).To4()
-		m.Answer = append(m.Answer, a)
+	if tp == dns.TypeA {
+		for _, r := range rr {
+			a := new(dns.A)
+			a.Hdr.Name = name
+			a.Hdr.Rrtype = tp
+			a.Hdr.Class = dns.ClassINET
+			a.Hdr.Ttl = r.TTL
+			a.A = net.ParseIP(r.Value).To4()
+			m.Answer = append(m.Answer, a)
+		}
+	}
+	if tp == dns.TypeAAAA {
+		for _, r := range rr {
+			aaaa := new(dns.AAAA)
+			aaaa.Hdr.Name = name
+			aaaa.Hdr.Rrtype = tp
+			aaaa.Hdr.Class = dns.ClassINET
+			aaaa.Hdr.Ttl = r.TTL
+			aaaa.AAAA = net.ParseIP(r.Value)
+			m.Answer = append(m.Answer, aaaa)
+		}
 	}
 	w.WriteMsg(m)
 }

@@ -5,6 +5,7 @@ package dnslite
 import (
 	"encoding/json"
 	"errors"
+	"github.com/miekg/dns"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -37,7 +38,7 @@ var RecordMap map[string][]TypeRecord
 var mapLock sync.Mutex
 
 func listRecord() []RecordInfo {
-    var rs []RecordInfo
+	var rs []RecordInfo
 	var r RecordInfo
 	mapLock.Lock()
 	defer mapLock.Unlock()
@@ -71,14 +72,16 @@ func addRecord(a RecordArgs) error {
 	if a.Name[len(a.Name)-1] != '.' {
 		a.Name = a.Name + "."
 	}
-	if a.Type != 1 {
+	if a.Type != dns.TypeA && a.Type != dns.TypeAAAA {
 		return errBadType
 	}
 	if a.TTL > 600 || a.TTL < 1 {
 		return errBadTTL
 	}
-	if net.ParseIP(a.Value) == nil {
-		return errBadValue
+	if a.Type == 1 {
+		if net.ParseIP(a.Value) == nil {
+			return errBadValue
+		}
 	}
 	key := a.Name + strconv.Itoa(int(a.Type))
 	var val TypeRecord

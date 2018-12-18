@@ -11,13 +11,15 @@ import (
 // UpDNS create new dns service
 func UpDNS() {
 	mux := dnslite.CreateDNSMux()
-	server := &dns.Server{Addr: "53", Net: "udp4"}
+	server := &dns.Server{Addr: ":53", Net: "udp4"}
 	dns.HandleFunc(".", mux.ServeDNS)
-	server.ListenAndServe()
+	err := server.ListenAndServe()
+	panic(err)
 }
 
 func main() {
 	go UpDNS()
 	mux := dnslite.CreateHTTPMux()
-	http.ListenAndServe(":8081", mux)
+	err := http.ListenAndServe(":8085", mux)
+	panic(err)
 }

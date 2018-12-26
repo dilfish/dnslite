@@ -72,7 +72,7 @@ func addRecord(a RecordArgs) error {
 	if a.Name[len(a.Name)-1] != '.' {
 		a.Name = a.Name + "."
 	}
-	if a.Type != dns.TypeA && a.Type != dns.TypeAAAA {
+	if a.Type != dns.TypeA && a.Type != dns.TypeAAAA && a.Type != dns.TypeTXT && a.Type != dns.TypeCAA {
 		return errBadType
 	}
 	if a.TTL > 600 || a.TTL < 1 {
@@ -89,7 +89,13 @@ func addRecord(a RecordArgs) error {
 	val.Value = a.Value
 	mapLock.Lock()
 	defer mapLock.Unlock()
-	RecordMap[key] = []TypeRecord{val}
+	v, ok := RecordMap[key]
+	if ok == false {
+		RecordMap[key] = []TypeRecord{val}
+	} else {
+		v = append(v, val)
+		RecordMap[key] = v
+	}
 	return nil
 }
 

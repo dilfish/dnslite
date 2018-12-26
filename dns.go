@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/miekg/dns"
 )
@@ -31,7 +32,7 @@ func getDNSInfo(r *dns.Msg) (name string, tp uint16, ex ExtraInfo, err error) {
 	log.Println("extra is", r.Extra)
 	name = r.Question[0].Name
 	tp = r.Question[0].Qtype
-	if tp != dns.TypeA && tp != dns.TypeNS && tp != dns.TypeAAAA {
+	if tp != dns.TypeA && tp != dns.TypeNS && tp != dns.TypeAAAA && tp != dns.TypeTXT && tp != dns.TypeCAA {
 		err = ErrNotA
 		log.Println("r.q.type is not A", tp)
 		return
@@ -52,7 +53,9 @@ func retNS(w dns.ResponseWriter, r *dns.Msg, name string) {
 	ns.Hdr.Rrtype = dns.TypeNS
 	ns.Hdr.Class = dns.ClassINET
 	ns.Hdr.Ttl = 60
-	ns.Ns = "ns.libsm.com."
+	ns.Ns = "ns1.libsm.com."
+	m.Answer = append(m.Answer, ns)
+	ns.Ns = "ns2.libsm.com."
 	m.Answer = append(m.Answer, ns)
 	w.WriteMsg(m)
 }
@@ -97,6 +100,30 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 			aaaa.Hdr.Ttl = r.TTL
 			aaaa.AAAA = net.ParseIP(r.Value)
 			m.Answer = append(m.Answer, aaaa)
+		}
+	}
+	if tp == dns.TypeTXT {
+		for _, r := range rr {
+			txt := new(dns.TXT)
+			txt.Hdr.Name = name
+			txt.Hdr.Rrtype = tp
+			txt.Hdr.Class = dns.ClassINET
+			txt.Hdr.Ttl = r.TTL
+			txt.Txt = strings.Split(r.Value, "\"")
+			m.Answer = append(m.Answer, txt)
+		}
+	}
+	if tp == dns.TypeCAA {
+		for _, r := range rr {
+			caa := new(dns.CAA)
+			caa.Hdr.Name = name
+			caa.Hdr.Rrtype = tp
+			caa.Hdr.Class = dns.ClassINET
+			caa.Hdr.Ttl = r.TTL
+			caa.Flag = 0
+			caa.Tag = "issue"
+			caa.Value = r.Value
+			m.Answer = append(m.Answer, caa)
 		}
 	}
 	w.WriteMsg(m)

@@ -65,6 +65,26 @@ func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
 	return nil, errNoSuchVal
 }
 
+
+func delRecord(d RecordArgs) error {
+	key := d.Name + strconv.Itoa(int(d.Type))
+	mapLock.Lock()
+	defer mapLock.Unlock()
+	v, ok := RecordMap[key]
+	if ok == false {
+		return nil
+	}
+	list := make([]TypeRecord, 0)
+	for _, item := range v {
+		if item.Value != d.Value {
+			list = append(list, item)
+		}
+	}
+	RecordMap[key] = list
+	return nil
+}
+
+
 func addRecord(a RecordArgs) error {
 	if a.Name == "" {
 		return errBadName
@@ -93,6 +113,11 @@ func addRecord(a RecordArgs) error {
 	if ok == false {
 		RecordMap[key] = []TypeRecord{val}
 	} else {
+		for _, item := range v {
+			if item.Value == a.Value {
+				return errBadValue
+			}
+		}
 		v = append(v, val)
 		RecordMap[key] = v
 	}
@@ -128,6 +153,27 @@ type RecordRet struct {
 	Msg string `json:"msg"`
 }
 
+
+// del record ignore ttl argument
+func httpDelRecord(w http.ResponseWriter, r *http.Request) {
+	var ret RecordRet
+	var d RecordArgs
+	ret.Msg = "ok"
+	err := handleParams(w, r, &d)
+	if err != nil {
+		return
+	}
+	err = delRecord(d)
+	if err != nil {
+		ret.Err = 2
+		ret.Msg = err.Error()
+	}
+	bt, _ := json.Marshal(ret)
+	w.Write(bt)
+	return
+}
+
+
 func httpAddRecord(w http.ResponseWriter, r *http.Request) {
 	var ret RecordRet
 	var a RecordArgs
@@ -160,5 +206,6 @@ func CreateHTTPMux() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/add.record", httpAddRecord)
 	mux.HandleFunc("/api/list.record", httpListRecord)
+	mux.HandleFunc("/api/del.record", httpDelRecord)
 	return mux
 }

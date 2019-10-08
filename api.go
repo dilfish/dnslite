@@ -67,6 +67,9 @@ func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
 
 
 func delRecord(d RecordArgs) error {
+	if d.Name[len(d.Name)-1] != '.' {
+		d.Name = d.Name + "."
+	}
 	key := d.Name + strconv.Itoa(int(d.Type))
 	mapLock.Lock()
 	defer mapLock.Unlock()

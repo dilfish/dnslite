@@ -15,7 +15,7 @@ import (
 var ErrBadQCount = errors.New("bad question count")
 
 // ErrNotA only supports A record
-var ErrNotA = errors.New("a support only")
+var ErrNotA = errors.New("type a support only")
 
 // ExtraInfo fills dns cookie and subnet
 type ExtraInfo struct {
@@ -29,7 +29,14 @@ func getDNSInfo(r *dns.Msg) (name string, tp uint16, ex ExtraInfo, err error) {
 		log.Println("r.question is not 1", len(r.Question))
 		return
 	}
-	log.Println("extra is", r.Extra)
+	for _, e := range r.Extra {
+		x, ok := e.(*dns.OPT)
+		if ok {
+			log.Println("subnet and udpsize:", x.Option, x.UDPSize())
+		} else {
+			log.Println("Unkown extra is:", e)
+		}
+	}
 	name = r.Question[0].Name
 	tp = r.Question[0].Qtype
 	if tp != dns.TypeA && tp != dns.TypeNS && tp != dns.TypeAAAA && tp != dns.TypeTXT && tp != dns.TypeCAA {
@@ -53,16 +60,16 @@ func retNS(w dns.ResponseWriter, r *dns.Msg, name string) {
 	ns.Hdr.Rrtype = dns.TypeNS
 	ns.Hdr.Class = dns.ClassINET
 	ns.Hdr.Ttl = 60
-	ns.Ns = "ns1.libsm.com."
+	ns.Ns = "ns1.dilfish.dev."
 	m.Answer = append(m.Answer, ns)
-	ns.Ns = "ns2.libsm.com."
+	ns.Ns = "ns2.dilfish.dev."
 	m.Answer = append(m.Answer, ns)
 	w.WriteMsg(m)
 }
 
 func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	log.Println("we get request from", w.RemoteAddr(), r.Question)
-	log.Println("flags are, auth:", r.Authoritative, "truncated:", r.Truncated, "recursiondesired:", r.RecursionDesired, "recursionavaliable:", r.RecursionAvailable, "ad:", r.AuthenticatedData, "cd:", r.CheckingDisabled)
+	log.Println("flags are, auth:", r.Authoritative, ", trunc:", r.Truncated, ", recur desired:", r.RecursionDesired, ", recur avail:", r.RecursionAvailable, "ad:", r.AuthenticatedData, "cd:", r.CheckingDisabled)
 	m := new(dns.Msg)
 	name, tp, _, err := getDNSInfo(r)
 	if err != nil {
@@ -76,6 +83,24 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 		return
 	}
 	rr, err := GetRecord(name, tp)
+	// we write back soa
+	if err == errNoSuchVal {
+		a := new(dns.SOA)
+		a.Hdr.Name = name
+		a.Hdr.Rrtype = dns.TypeSOA
+		a.Hdr.Class = dns.ClassINET
+		a.Hdr.Ttl = 600
+		a.Serial = 2012143034
+		a.Refresh = 300
+		a.Expire = 2592000
+		a.Retry = 300
+		a.Mbox = "i.at.dilfish.dev."
+		a.Minttl = 100
+		a.Ns = "ns1.dilfish.dev."
+		m.Answer = append(m.Answer, a)
+		w.WriteMsg(m)
+		return
+	}
 	if err != nil {
 		log.Println("get record error", name, tp, err)
 		return
@@ -131,6 +156,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 
 // CreateDNSMux create mux for dns like http
 func CreateDNSMux() *dns.ServeMux {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	mux := dns.NewServeMux()
 	mux.HandleFunc(".", handleRequest)
 	return mux

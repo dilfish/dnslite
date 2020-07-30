@@ -73,15 +73,19 @@ func retNS(w dns.ResponseWriter, r *dns.Msg, name string) {
 	m := new(dns.Msg)
 	m.SetReply(r)
 	m.Authoritative = true
-	ns := new(dns.NS)
-	ns.Hdr.Name = name
-	ns.Hdr.Rrtype = dns.TypeNS
-	ns.Hdr.Class = dns.ClassINET
-	ns.Hdr.Ttl = 60
-	ns.Ns = "ns1.dilfish.dev."
-	m.Answer = append(m.Answer, ns)
-	ns.Ns = "ns2.dilfish.dev."
-	m.Answer = append(m.Answer, ns)
+	var ns1, ns2 dns.NS
+	ns1.Hdr.Name = name
+	ns2.Hdr.Name = name
+	ns1.Hdr.Rrtype = dns.TypeNS
+	ns2.Hdr.Rrtype = dns.TypeNS
+	ns1.Hdr.Class = dns.ClassINET
+	ns2.Hdr.Class = dns.ClassINET
+	ns1.Hdr.Ttl = 60
+	ns2.Hdr.Ttl = 60
+	ns1.Ns = "ns1.dilfish.dev."
+	m.Answer = append(m.Answer, &ns1)
+	ns2.Ns = "ns2.dilfish.dev."
+	m.Answer = append(m.Answer, &ns2)
 	w.WriteMsg(m)
 }
 

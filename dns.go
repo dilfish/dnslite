@@ -25,11 +25,16 @@ type ExtraInfo struct {
 
 func isSupportedType(tp uint16) bool {
 	switch tp {
-	case dns.TypeA: fallthrough
-	case dns.TypeAAAA: fallthrough
-	case dns.TypeNS: fallthrough
-	case dns.TypeTXT: fallthrough
-	case dns.TypeCAA: fallthrough
+	case dns.TypeA:
+		fallthrough
+	case dns.TypeAAAA:
+		fallthrough
+	case dns.TypeNS:
+		fallthrough
+	case dns.TypeTXT:
+		fallthrough
+	case dns.TypeCAA:
+		fallthrough
 	case dns.TypeCNAME:
 		return true
 	}
@@ -106,7 +111,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	// we write back soa
 	if err == errNoSuchVal {
 		a := new(dns.SOA)
-		fillHdr(&a.Hdr, name, tp, 600)
+		fillHdr(&a.Hdr, name, dns.TypeSOA, 600)
 		a.Serial = 2012143034
 		a.Refresh = 300
 		a.Expire = 2592000

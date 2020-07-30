@@ -23,6 +23,19 @@ type ExtraInfo struct {
 	Subnet string
 }
 
+func isSupportedType(tp uint16) bool {
+	switch tp {
+	case dns.TypeA: fallthrough
+	case dns.TypeAAAA: fallthrough
+	case dns.TypeNS: fallthrough
+	case dns.TypeTXT: fallthrough
+	case dns.TypeCAA: fallthrough
+	case dns.TypeCNAME:
+		return true
+	}
+	return false
+}
+
 func getDNSInfo(r *dns.Msg) (name string, tp uint16, ex ExtraInfo, err error) {
 	if len(r.Question) != 1 {
 		err = ErrBadQCount
@@ -32,14 +45,14 @@ func getDNSInfo(r *dns.Msg) (name string, tp uint16, ex ExtraInfo, err error) {
 	for _, e := range r.Extra {
 		x, ok := e.(*dns.OPT)
 		if ok {
-			log.Println("subnet and udpsize:", x.Option, x.UDPSize())
+			log.Println("subnet and udp size:", x.Option, x.UDPSize())
 		} else {
 			log.Println("Unkown extra is:", e)
 		}
 	}
 	name = r.Question[0].Name
 	tp = r.Question[0].Qtype
-	if tp != dns.TypeA && tp != dns.TypeNS && tp != dns.TypeAAAA && tp != dns.TypeTXT && tp != dns.TypeCAA {
+	if !isSupportedType(tp) {
 		err = ErrNotA
 		log.Println("r.q.type is not A", tp)
 		return
@@ -67,6 +80,13 @@ func retNS(w dns.ResponseWriter, r *dns.Msg, name string) {
 	w.WriteMsg(m)
 }
 
+func fillHdr(hdr *dns.RR_Header, name string, tp uint16, ttl uint32) {
+	hdr.Name = name
+	hdr.Ttl = ttl
+	hdr.Class = dns.ClassINET
+	hdr.Rrtype = tp
+}
+
 func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	log.Println("we get request from", w.RemoteAddr(), r.Question)
 	log.Println("flags are, auth:", r.Authoritative, ", trunc:", r.Truncated, ", recur desired:", r.RecursionDesired, ", recur avail:", r.RecursionAvailable, "ad:", r.AuthenticatedData, "cd:", r.CheckingDisabled)
@@ -86,10 +106,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	// we write back soa
 	if err == errNoSuchVal {
 		a := new(dns.SOA)
-		a.Hdr.Name = name
-		a.Hdr.Rrtype = dns.TypeSOA
-		a.Hdr.Class = dns.ClassINET
-		a.Hdr.Ttl = 600
+		fillHdr(&a.Hdr, name, tp, 600)
 		a.Serial = 2012143034
 		a.Refresh = 300
 		a.Expire = 2592000
@@ -108,10 +125,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	if tp == dns.TypeA {
 		for _, r := range rr {
 			a := new(dns.A)
-			a.Hdr.Name = name
-			a.Hdr.Rrtype = tp
-			a.Hdr.Class = dns.ClassINET
-			a.Hdr.Ttl = r.TTL
+			fillHdr(&a.Hdr, name, tp, r.TTL)
 			a.A = net.ParseIP(r.Value).To4()
 			m.Answer = append(m.Answer, a)
 		}
@@ -119,10 +133,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	if tp == dns.TypeAAAA {
 		for _, r := range rr {
 			aaaa := new(dns.AAAA)
-			aaaa.Hdr.Name = name
-			aaaa.Hdr.Rrtype = tp
-			aaaa.Hdr.Class = dns.ClassINET
-			aaaa.Hdr.Ttl = r.TTL
+			fillHdr(&aaaa.Hdr, name, tp, r.TTL)
 			aaaa.AAAA = net.ParseIP(r.Value)
 			m.Answer = append(m.Answer, aaaa)
 		}
@@ -130,10 +141,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	if tp == dns.TypeTXT {
 		for _, r := range rr {
 			txt := new(dns.TXT)
-			txt.Hdr.Name = name
-			txt.Hdr.Rrtype = tp
-			txt.Hdr.Class = dns.ClassINET
-			txt.Hdr.Ttl = r.TTL
+			fillHdr(&txt.Hdr, name, tp, r.TTL)
 			txt.Txt = strings.Split(r.Value, "\"")
 			m.Answer = append(m.Answer, txt)
 		}
@@ -141,14 +149,19 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	if tp == dns.TypeCAA {
 		for _, r := range rr {
 			caa := new(dns.CAA)
-			caa.Hdr.Name = name
-			caa.Hdr.Rrtype = tp
-			caa.Hdr.Class = dns.ClassINET
-			caa.Hdr.Ttl = r.TTL
+			fillHdr(&caa.Hdr, name, tp, r.TTL)
 			caa.Flag = 0
 			caa.Tag = "issue"
 			caa.Value = r.Value
 			m.Answer = append(m.Answer, caa)
+		}
+	}
+	if tp == dns.TypeCNAME {
+		for _, r := range rr {
+			cname := new(dns.CNAME)
+			fillHdr(&cname.Hdr, name, tp, r.TTL)
+			cname.Target = r.Value
+			m.Answer = append(m.Answer, cname)
 		}
 	}
 	w.WriteMsg(m)

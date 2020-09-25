@@ -6,7 +6,7 @@
 [![GoDoc](https://godoc.org/github.com/dilfish/dnslite?status.svg)](https://godoc.org/github.com/dilfish/dnslite)
 
 
-no performance warrenty
-support ttl as low as 1
-HTTP API support
-private view(domain name) support
+- no performance warrenty
+- support ttl as low as 1
+- HTTP API support
+- private view(domain name) support

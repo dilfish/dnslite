@@ -5,12 +5,13 @@ package dnslite
 import (
 	"encoding/json"
 	"errors"
-	"github.com/miekg/dns"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"strconv"
 	"sync"
+
+	"github.com/miekg/dns"
 )
 
 var errValExists = errors.New("no default line")
@@ -65,7 +66,6 @@ func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
 	return nil, errNoSuchVal
 }
 
-
 func delRecord(d RecordArgs) error {
 	if d.Name[len(d.Name)-1] != '.' {
 		d.Name = d.Name + "."
@@ -86,7 +86,6 @@ func delRecord(d RecordArgs) error {
 	RecordMap[key] = list
 	return nil
 }
-
 
 func addRecord(a RecordArgs) error {
 	if a.Name == "" {
@@ -156,7 +155,6 @@ type RecordRet struct {
 	Msg string `json:"msg"`
 }
 
-
 // del record ignore ttl argument
 func httpDelRecord(w http.ResponseWriter, r *http.Request) {
 	var ret RecordRet
@@ -175,7 +173,6 @@ func httpDelRecord(w http.ResponseWriter, r *http.Request) {
 	w.Write(bt)
 	return
 }
-
 
 func httpAddRecord(w http.ResponseWriter, r *http.Request) {
 	var ret RecordRet

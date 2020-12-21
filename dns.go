@@ -15,7 +15,7 @@ import (
 var ErrBadQCount = errors.New("bad question count")
 
 // ErrNotA only supports A record
-var ErrNotA = errors.New("a support only")
+var ErrNotA = errors.New("type A support only")
 
 // ExtraInfo fills dns cookie and subnet
 type ExtraInfo struct {
@@ -53,9 +53,9 @@ func retNS(w dns.ResponseWriter, r *dns.Msg, name string) {
 	ns.Hdr.Rrtype = dns.TypeNS
 	ns.Hdr.Class = dns.ClassINET
 	ns.Hdr.Ttl = 60
-	ns.Ns = "ns1.libsm.com."
+	ns.Ns = "ns1.dilfish.dev."
 	m.Answer = append(m.Answer, ns)
-	ns.Ns = "ns2.libsm.com."
+	ns.Ns = "ns2.dilfish.dev."
 	m.Answer = append(m.Answer, ns)
 	w.WriteMsg(m)
 }

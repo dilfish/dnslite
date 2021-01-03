@@ -3,9 +3,10 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/dilfish/dnslite"
 	"github.com/miekg/dns"
-	"net/http"
 )
 
 // UpDNS create new dns service

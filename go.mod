@@ -17,4 +17,4 @@ require (
 	gopkg.in/gin-gonic/gin.v1 v1.3.0 // indirect
 )
 
-go 1.15
+go 1.16

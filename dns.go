@@ -114,17 +114,12 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	rr, err := GetRecord(name, tp)
 	// we write back soa
 	if err == errNoSuchVal {
-		a := new(dns.SOA)
-		fillHdr(&a.Hdr, name, dns.TypeSOA, 600)
-		a.Serial = 2012143034
-		a.Refresh = 300
-		a.Expire = 2592000
-		a.Retry = 300
-		a.Mbox = "i.at.dilfish.dev."
-		a.Minttl = 100
-		a.Ns = "ns1.dilfish.dev."
-		m.Answer = append(m.Answer, a)
-		w.WriteMsg(m)
+		c := new(dns.Client)
+		r, _, err := c.Exchange(r, "1.1.1.1"+":53")
+		if err != nil {
+			log.Println("exchange error:", err)
+		}
+		w.WriteMsg(r)
 		return
 	}
 	if err != nil {

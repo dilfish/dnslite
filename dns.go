@@ -112,10 +112,11 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 		return
 	}
 	rr, err := GetRecord(name, tp)
-	// we write back soa
+	// when NON set record is requested, we proxy it to 1.1.1.1
 	if err == errNoSuchVal {
 		c := new(dns.Client)
-		r, _, err := c.Exchange(r, "1.1.1.1"+":53")
+		log.Println("proxy to:", name, tp)
+		r, _, err := c.Exchange(r, "1.1.1.1:53")
 		if err != nil {
 			log.Println("exchange error:", err)
 		}

@@ -94,16 +94,33 @@ func addRecord(a RecordArgs) error {
 	if a.Name[len(a.Name)-1] != '.' {
 		a.Name = a.Name + "."
 	}
-	if a.Type != dns.TypeA && a.Type != dns.TypeAAAA && a.Type != dns.TypeTXT && a.Type != dns.TypeCAA {
+	if !isSupportedType(a.Type) {
+		log.Println("we does not support type:", a.Type)
 		return errBadType
 	}
 	if a.TTL > 600 || a.TTL < 1 {
 		return errBadTTL
 	}
-	if a.Type == 1 {
-		if net.ParseIP(a.Value) == nil {
-			return errBadValue
-		}
+	switch a.Type {
+		case dns.TypeA:
+			ip := net.ParseIP(a.Value)
+			if ip == nil {
+				return errBadValue
+			}
+			ip = ip.To4()
+			if ip == nil {
+				return errBadValue
+			}
+		case dns.TypeAAAA:
+			ip := net.ParseIP(a.Value)
+			if ip == nil {
+				return errBadValue
+			}
+			ip = ip.To4()
+			if ip != nil {
+				return errBadValue
+			}
+		// no need to check cname, ns, caa and txt
 	}
 	key := a.Name + strconv.Itoa(int(a.Type))
 	var val TypeRecord

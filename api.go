@@ -4,23 +4,15 @@ package dnslite
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"strconv"
 	"sync"
-	"log"
 
 	"github.com/miekg/dns"
 )
-
-var errValExists = errors.New("no default line")
-var errNoSuchVal = errors.New("no such value")
-var errBadName = errors.New("bad name")
-var errBadType = errors.New("bad type")
-var errBadTTL = errors.New("bad ttl")
-var errBadValue = errors.New("bad value")
 
 // TypeRecord reprents a record value and ttl
 type TypeRecord struct {
@@ -64,7 +56,7 @@ func GetRecord(name string, tp uint16) ([]TypeRecord, error) {
 	if ok == true {
 		return vs, nil
 	}
-	return nil, errNoSuchVal
+	return nil, ErrNoSuchVal
 }
 
 func delRecord(d RecordArgs) error {
@@ -90,37 +82,37 @@ func delRecord(d RecordArgs) error {
 
 func addRecord(a RecordArgs) error {
 	if a.Name == "" {
-		return errBadName
+		return ErrBadName
 	}
 	if a.Name[len(a.Name)-1] != '.' {
 		a.Name = a.Name + "."
 	}
 	if !isSupportedType(a.Type) {
 		log.Println("we does not support type:", a.Type)
-		return errBadType
+		return ErrBadType
 	}
 	if a.TTL > 600 || a.TTL < 1 {
-		return errBadTTL
+		return ErrBadTTL
 	}
 	switch a.Type {
-		case dns.TypeA:
-			ip := net.ParseIP(a.Value)
-			if ip == nil {
-				return errBadValue
-			}
-			ip = ip.To4()
-			if ip == nil {
-				return errBadValue
-			}
-		case dns.TypeAAAA:
-			ip := net.ParseIP(a.Value)
-			if ip == nil {
-				return errBadValue
-			}
-			ip = ip.To4()
-			if ip != nil {
-				return errBadValue
-			}
+	case dns.TypeA:
+		ip := net.ParseIP(a.Value)
+		if ip == nil {
+			return ErrBadValue
+		}
+		ip = ip.To4()
+		if ip == nil {
+			return ErrBadValue
+		}
+	case dns.TypeAAAA:
+		ip := net.ParseIP(a.Value)
+		if ip == nil {
+			return ErrBadValue
+		}
+		ip = ip.To4()
+		if ip != nil {
+			return ErrBadValue
+		}
 		// no need to check cname, ns, caa and txt
 	}
 	key := a.Name + strconv.Itoa(int(a.Type))
@@ -135,7 +127,7 @@ func addRecord(a RecordArgs) error {
 	} else {
 		for _, item := range v {
 			if item.Value == a.Value {
-				return errBadValue
+				return ErrBadValue
 			}
 		}
 		v = append(v, val)

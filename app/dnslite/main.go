@@ -3,6 +3,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/dilfish/dnslite"
@@ -18,7 +19,6 @@ func UpDNS() {
 	panic(err)
 }
 
-
 // UpDoT
 func UpDoT() {
 	cert := "/etc/letsencrypt/live/dilfish.dev-0001/fullchain.pem"
@@ -31,6 +31,7 @@ func UpDoT() {
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	go UpDoT()
 	mux := dnslite.CreateHTTPMux()
 	err := http.ListenAndServe(":8085", mux)

@@ -3,19 +3,12 @@
 package dnslite
 
 import (
-	"errors"
 	"log"
 	"net"
 	"strings"
 
 	"github.com/miekg/dns"
 )
-
-// ErrBadQCount is more than 1 question count
-var ErrBadQCount = errors.New("bad question count")
-
-// ErrNotA only supports A record
-var ErrNotSupported = errors.New("type A support only")
 
 // ExtraInfo fills dns cookie and subnet
 type ExtraInfo struct {
@@ -41,7 +34,7 @@ func isSupportedType(tp uint16) bool {
 	return false
 }
 
-func getDNSInfo(r *dns.Msg) (name string, tp uint16, ex ExtraInfo, err error) {
+func getDNSInfo(r *dns.Msg) (name string, tp dns.Type, ex ExtraInfo, err error) {
 	if len(r.Question) != 1 {
 		err = ErrBadQCount
 		log.Println("r.question is not 1", len(r.Question))
@@ -50,16 +43,32 @@ func getDNSInfo(r *dns.Msg) (name string, tp uint16, ex ExtraInfo, err error) {
 	for _, e := range r.Extra {
 		x, ok := e.(*dns.OPT)
 		if ok {
-			log.Println("subnet and udp size:", x.Option, x.UDPSize())
+			log.Println("subnet and udp size:", len(x.Option), x.UDPSize())
+			for _, o := range x.Option {
+				switch o.Option() {
+				case dns.EDNS0SUBNET:
+					log.Println("we get subnet:")
+					sub, ok := o.(*dns.EDNS0_SUBNET)
+					if ok {
+						log.Println("sub info:", sub.String())
+					}
+				case dns.EDNS0COOKIE:
+					log.Println("we get cookie")
+					cookie, ok := o.(*dns.EDNS0_COOKIE)
+					if ok {
+						log.Println("cookie info:", cookie.String())
+					}
+				}
+			}
 		} else {
-			log.Println("Unkown extra is:", e)
+			log.Println("Unkown extra is:", e.String())
 		}
 	}
 	name = r.Question[0].Name
-	tp = r.Question[0].Qtype
-	if !isSupportedType(tp) {
-		err = ErrNotA
-		log.Println("request type is not A", r.Question[0].Qtype)
+	tp = dns.Type(r.Question[0].Qtype)
+	if !isSupportedType(uint16(tp)) {
+		err = ErrNotSupported
+		log.Println("request type is not supported:", r.Question[0].Qtype)
 		return
 	}
 	if len(r.Extra) > 2 {
@@ -98,8 +107,8 @@ func fillHdr(hdr *dns.RR_Header, name string, tp uint16, ttl uint32) {
 
 type Handler struct{}
 
-func (h *Handler)ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
-	log.Println("we get request from", w.RemoteAddr(), r.Question)
+func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
+	log.Println("remote addr:", w.RemoteAddr())
 	log.Println("flags are, auth:", r.Authoritative, ", trunc:", r.Truncated, ", recur desired:", r.RecursionDesired, ", recur avail:", r.RecursionAvailable, "ad:", r.AuthenticatedData, "cd:", r.CheckingDisabled)
 	m := new(dns.Msg)
 	name, tp, _, err := getDNSInfo(r)
@@ -107,15 +116,17 @@ func (h *Handler)ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		log.Println("bad dns info", err)
 		return
 	}
+	tp16 := uint16(tp)
+	log.Println("name and type:", name, tp)
 	m.SetReply(r)
 	m.Authoritative = true
-	if tp == dns.TypeNS {
+	if uint16(tp) == dns.TypeNS {
 		retNS(w, r, name)
 		return
 	}
-	rr, err := GetRecord(name, tp)
+	rr, err := GetRecord(name, uint16(tp))
 	// when NON set record is requested, we proxy it to 1.1.1.1
-	if err == errNoSuchVal {
+	if err == ErrNoSuchVal {
 		c := new(dns.Client)
 		log.Println("proxy to:", name, tp)
 		r, _, err := c.Exchange(r, "1.1.1.1:53")
@@ -129,44 +140,44 @@ func (h *Handler)ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		log.Println("get record error", name, tp, err)
 		return
 	}
-	if tp == dns.TypeA {
+	if tp16 == dns.TypeA {
 		for _, r := range rr {
 			a := new(dns.A)
-			fillHdr(&a.Hdr, name, tp, r.TTL)
+			fillHdr(&a.Hdr, name, tp16, r.TTL)
 			a.A = net.ParseIP(r.Value).To4()
 			m.Answer = append(m.Answer, a)
 		}
 	}
-	if tp == dns.TypeAAAA {
+	if tp16 == dns.TypeAAAA {
 		for _, r := range rr {
 			aaaa := new(dns.AAAA)
-			fillHdr(&aaaa.Hdr, name, tp, r.TTL)
+			fillHdr(&aaaa.Hdr, name, tp16, r.TTL)
 			aaaa.AAAA = net.ParseIP(r.Value)
 			m.Answer = append(m.Answer, aaaa)
 		}
 	}
-	if tp == dns.TypeTXT {
+	if tp16 == dns.TypeTXT {
 		for _, r := range rr {
 			txt := new(dns.TXT)
-			fillHdr(&txt.Hdr, name, tp, r.TTL)
+			fillHdr(&txt.Hdr, name, tp16, r.TTL)
 			txt.Txt = strings.Split(r.Value, "\"")
 			m.Answer = append(m.Answer, txt)
 		}
 	}
-	if tp == dns.TypeCAA {
+	if tp16 == dns.TypeCAA {
 		for _, r := range rr {
 			caa := new(dns.CAA)
-			fillHdr(&caa.Hdr, name, tp, r.TTL)
+			fillHdr(&caa.Hdr, name, tp16, r.TTL)
 			caa.Flag = 0
 			caa.Tag = "issue"
 			caa.Value = r.Value
 			m.Answer = append(m.Answer, caa)
 		}
 	}
-	if tp == dns.TypeCNAME {
+	if tp16 == dns.TypeCNAME {
 		for _, r := range rr {
 			cname := new(dns.CNAME)
-			fillHdr(&cname.Hdr, name, tp, r.TTL)
+			fillHdr(&cname.Hdr, name, tp16, r.TTL)
 			cname.Target = r.Value
 			m.Answer = append(m.Answer, cname)
 		}

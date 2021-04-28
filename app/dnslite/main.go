@@ -18,8 +18,20 @@ func UpDNS() {
 	panic(err)
 }
 
+
+// UpDoT
+func UpDoT() {
+	cert := "/etc/letsencrypt/live/dilfish.dev-0001/fullchain.pem"
+	key := "/etc/letsencrypt/live/dilfish.dev-0001/privkey.pem"
+	var h dnslite.Handler
+	err := dns.ListenAndServeTLS(":853", cert, key, &h)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	go UpDNS()
+	go UpDoT()
 	mux := dnslite.CreateHTTPMux()
 	err := http.ListenAndServe(":8085", mux)
 	panic(err)

@@ -96,7 +96,9 @@ func fillHdr(hdr *dns.RR_Header, name string, tp uint16, ttl uint32) {
 	hdr.Rrtype = tp
 }
 
-func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
+type Handler struct{}
+
+func (h *Handler)ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	log.Println("we get request from", w.RemoteAddr(), r.Question)
 	log.Println("flags are, auth:", r.Authoritative, ", trunc:", r.Truncated, ", recur desired:", r.RecursionDesired, ", recur avail:", r.RecursionAvailable, "ad:", r.AuthenticatedData, "cd:", r.CheckingDisabled)
 	m := new(dns.Msg)
@@ -176,6 +178,7 @@ func handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 func CreateDNSMux() *dns.ServeMux {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	mux := dns.NewServeMux()
-	mux.HandleFunc(".", handleRequest)
+	var h Handler
+	mux.HandleFunc(".", h.ServeDNS)
 	return mux
 }

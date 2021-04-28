@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"log"
 
 	"github.com/miekg/dns"
 )

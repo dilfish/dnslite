@@ -30,6 +30,8 @@ func isSupportedType(tp uint16) bool {
 		fallthrough
 	case dns.TypeCNAME:
 		return true
+	case dns.TypePTR:
+		return true
 	}
 	return false
 }
@@ -105,6 +107,24 @@ func fillHdr(hdr *dns.RR_Header, name string, tp uint16, ttl uint32) {
 	hdr.Rrtype = tp
 }
 
+func GetDataFromRealDNS(req *dns.Msg) (*dns.Msg, error) {
+	dnsList := []string{
+		"119.29.29.29",    // tencent
+		"114.114.114.114", // 114
+		"1.1.1.1",         // cloudflare
+		"8.8.8.8",         // google
+	}
+	for _, d := range dnsList {
+		c := new(dns.Client)
+		ret, _, err := c.Exchange(req, d+":53")
+		if err == nil {
+			log.Println("exchange error of", d, err)
+			return ret, nil
+		}
+	}
+	return nil, ErrNoGoodServers
+}
+
 type Handler struct{}
 
 func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
@@ -127,9 +147,7 @@ func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	rr, err := GetRecord(name, uint16(tp))
 	// when NON set record is requested, we proxy it to 1.1.1.1
 	if err == ErrNoSuchVal {
-		c := new(dns.Client)
-		log.Println("proxy name and type to 1.1.1.1:", name, tp)
-		r, _, err := c.Exchange(r, "1.1.1.1:53")
+		r, err := GetDataFromRealDNS(r)
 		if err != nil {
 			log.Println("exchange error:", err)
 			return

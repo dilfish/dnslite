@@ -68,7 +68,7 @@ func getDNSInfo(r *dns.Msg) (name string, tp dns.Type, ex ExtraInfo, err error) 
 	tp = dns.Type(r.Question[0].Qtype)
 	if !isSupportedType(uint16(tp)) {
 		err = ErrNotSupported
-		log.Println("request type is not supported:", r.Question[0].Qtype)
+		log.Println("request type is not supported:", dns.Type(r.Question[0].Qtype))
 		return
 	}
 	if len(r.Extra) > 2 {

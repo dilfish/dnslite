@@ -11,20 +11,20 @@ import (
 )
 
 // UpDNS create new dns service
-func UpDNS() {
-	mux := dnslite.CreateDNSMux()
-	server := &dns.Server{Addr: ":53", Net: "udp"}
-	dns.HandleFunc(".", mux.ServeDNS)
-	err := server.ListenAndServe()
-	panic(err)
+func UpDNS(conf *dnslite.MongoClientConfig) {
+	h := dnslite.NewHandler(conf)
+	err := dns.ListenAndServe(":53", "udp", h)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // UpDoT
-func UpDoT() {
+func UpDoT(conf *dnslite.MongoClientConfig) {
 	cert := "/etc/letsencrypt/live/dilfish.dev-0001/fullchain.pem"
 	key := "/etc/letsencrypt/live/dilfish.dev-0001/privkey.pem"
-	var h dnslite.Handler
-	err := dns.ListenAndServeTLS(":853", cert, key, &h)
+	h := dnslite.NewHandler(conf)
+	err := dns.ListenAndServeTLS(":853", cert, key, h)
 	if err != nil {
 		panic(err)
 	}
@@ -32,9 +32,13 @@ func UpDoT() {
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	go UpDoT()
-	go UpDNS()
-	mux := dnslite.CreateHTTPMux()
-	err := http.ListenAndServe(":8085", mux)
+	var conf dnslite.MongoClientConfig
+	conf.Addr = "mongodb://localhost:27017"
+	conf.DB = "dnslite"
+	conf.Coll = "records"
+	go UpDoT(&conf)
+	go UpDNS(&conf)
+	api := dnslite.NewApiHandler(&conf)
+	err := http.ListenAndServe(":8085", api)
 	panic(err)
 }

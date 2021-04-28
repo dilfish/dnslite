@@ -5,7 +5,7 @@ import "errors"
 // ErrBadQCount is more than 1 question count
 var ErrBadQCount = errors.New("bad question count")
 
-// ErrNotA only supports A record
+// ErrNotSupported only supports A record
 var ErrNotSupported = errors.New("type not supported")
 
 var ErrValExists = errors.New("no default line")

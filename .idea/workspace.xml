@@ -2,9 +2,27 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="824504b2-e674-493c-83af-08a5427caade" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/a.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/aaaa.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api_add.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api_del.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api_list.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cca.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cname.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extra.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ns.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/proxy.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/txt.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/type.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/dnslite/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/dnslite/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dns.go" beforeDir="false" afterPath="$PROJECT_DIR$/dns.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dns_test.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/error.go" beforeDir="false" afterPath="$PROJECT_DIR$/error.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,11 +44,15 @@
     <option name="indexEntireGoPath" value="false" />
   </component>
   <component name="ProjectId" id="1mY0ShZmHDzg4ya5QiNAlDs1lOr" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
@@ -55,6 +77,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

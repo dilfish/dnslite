@@ -33,6 +33,7 @@ func UpDoT() {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	go UpDoT()
+	go UpDNS()
 	mux := dnslite.CreateHTTPMux()
 	err := http.ListenAndServe(":8085", mux)
 	panic(err)

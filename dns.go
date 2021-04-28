@@ -118,8 +118,9 @@ func GetDataFromRealDNS(req *dns.Msg) (*dns.Msg, error) {
 		c := new(dns.Client)
 		ret, _, err := c.Exchange(req, d+":53")
 		if err == nil {
-			log.Println("exchange error of", d, err)
 			return ret, nil
+		} else {
+			log.Println("exchange error of:", d, err)
 		}
 	}
 	return nil, ErrNoGoodServers
@@ -159,6 +160,7 @@ func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		log.Println("get record error", name, tp, err)
 		return
 	}
+	log.Println("hit cache", name, tp)
 	if tp16 == dns.TypeA {
 		for _, r := range rr {
 			a := new(dns.A)

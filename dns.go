@@ -15,7 +15,7 @@ import (
 var ErrBadQCount = errors.New("bad question count")
 
 // ErrNotA only supports A record
-var ErrNotA = errors.New("type A support only")
+var ErrNotSupported = errors.New("type A support only")
 
 // ExtraInfo fills dns cookie and subnet
 type ExtraInfo struct {
@@ -59,7 +59,7 @@ func getDNSInfo(r *dns.Msg) (name string, tp uint16, ex ExtraInfo, err error) {
 	tp = r.Question[0].Qtype
 	if !isSupportedType(tp) {
 		err = ErrNotA
-		log.Println("r.q.type is not A", tp)
+		log.Println("request type is not A", r.Question[0].Qtype)
 		return
 	}
 	if len(r.Extra) > 2 {

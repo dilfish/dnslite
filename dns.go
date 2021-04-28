@@ -128,10 +128,11 @@ func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	// when NON set record is requested, we proxy it to 1.1.1.1
 	if err == ErrNoSuchVal {
 		c := new(dns.Client)
-		log.Println("proxy to:", name, tp)
+		log.Println("proxy name and type to 1.1.1.1:", name, tp)
 		r, _, err := c.Exchange(r, "1.1.1.1:53")
 		if err != nil {
 			log.Println("exchange error:", err)
+			return
 		}
 		w.WriteMsg(r)
 		return

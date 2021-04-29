@@ -1,8 +1,9 @@
-// Copyright 2018 Sean.ZH
+// Copyright 2021 Sean.ZH
 
 package dnslite
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -10,6 +11,10 @@ import (
 )
 
 func (a *ApiHandler) DelRecord(w http.ResponseWriter, r *http.Request) {
+        if r.Method != http.MethodPost {
+                w.Write(a.BadMethodMsg)
+                return
+        }
 	var record DNSRecord
 	err := a.UnjsonRequest(r, &record)
 	if err != nil {
@@ -22,4 +27,6 @@ func (a *ApiHandler) DelRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.DB.Del(bson.M{"_id": record.Id})
+	bt, _ := json.Marshal(record)
+	w.Write(bt)
 }

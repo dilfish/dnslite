@@ -3,11 +3,17 @@
 package dnslite
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Write(a.BadMethodMsg)
+		return
+	}
 	var record DNSRecord
 	err := a.UnjsonRequest(r, &record)
 	if err != nil {
@@ -30,10 +36,13 @@ func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
 		w.Write(a.BadRecordValue)
 		return
 	}
+	record.Id = primitive.NewObjectID()
 	err = a.DB.Insert(record)
 	if err != nil {
 		w.Write(a.InsertErrMsg)
 		return
 	}
-	w.Write(a.OkMsg)
+	record.Msg = "ok"
+	bt, _ := json.Marshal(record)
+	w.Write(bt)
 }

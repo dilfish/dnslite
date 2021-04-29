@@ -14,13 +14,17 @@ func (c *CNAMEHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 		rr[idx].Hdr.Name = req.Question[0].Name
 		rr[idx].Hdr.Rrtype = dns.TypeCNAME
 		rr[idx].Hdr.Class = dns.ClassINET
-		rr[idx].Hdr.Ttl = record.TTL
-		rr[idx].Target = record.CNAME
+		rr[idx].Hdr.Ttl = record.Ttl
+		rr[idx].Target = record.Cname
 		m.Answer = append(m.Answer, &rr[idx])
 	}
 	return m
 }
 
 func (c *CNAMEHandler) CheckRecord(record *DNSRecord) error {
+	is := GoodName(record.Cname)
+	if !is {
+		return ErrBadValue
+	}
 	return nil
 }

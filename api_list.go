@@ -1,4 +1,4 @@
-// Copyright 2018 Sean.ZH
+// Copyright 2021 Sean.ZH
 
 package dnslite
 
@@ -10,6 +10,10 @@ import (
 )
 
 func (a *ApiHandler) ListRecord(w http.ResponseWriter, r *http.Request) {
+        if r.Method != http.MethodPost {
+                w.Write(a.BadMethodMsg)
+                return
+        }
 	var record DNSRecord
 	err := a.UnjsonRequest(r, &record)
 	if err != nil {
@@ -17,7 +21,7 @@ func (a *ApiHandler) ListRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// for good check
-	record.TTL = 100
+	record.Ttl = 100
 	err = CommonCheck(&record)
 	if err != nil {
 		w.Write(a.BadRecordValue)

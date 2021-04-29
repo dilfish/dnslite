@@ -11,14 +11,14 @@ type DNSRecord struct {
 	Id    primitive.ObjectID `json:"_id" bson:"_id"`
 	Name  string             `json:"name" bson:"name"`
 	Type  uint16             `json:"type" bson:"type"`
-	TTL   uint32             `json:"ttl" bson:"ttl"`
+	Ttl   uint32             `json:"ttl" bson:"ttl"`
 	View  string             `json:"view" bson:"view"`
 	A     string             `json:"a,omitempty" bson:"a,omitempty"`
-	AAAA  string             `json:"aaaa,omitempty" bson:"aaaa,omitempty"`
-	NS    string             `json:"ns,omitempty" bson:"ns,omitempty"`
-	CNAME string             `json:"cname,omitempty" bson:"cname,omitempty"`
+	Aaaa  string             `json:"aaaa,omitempty" bson:"aaaa,omitempty"`
+	Ns    string             `json:"ns,omitempty" bson:"ns,omitempty"`
+	Cname string             `json:"cname,omitempty" bson:"cname,omitempty"`
 	Txt   string             `json:"txt,omitempty" bson:"txt,omitempty"`
-	CAA   string             `json:"caa,omitempty" bson:"caa,omitempty"`
+	Caa   string             `json:"caa,omitempty" bson:"caa,omitempty"`
 	Tag   string             `json:"tag,omitempty" bson:"tag,omitempty"`
 	Flag  uint8              `json:"flag,omitempty" bson:"flag,omitempty"`
 	Code  int                `json:"code,omitempty" bson:"code,omitempty"`

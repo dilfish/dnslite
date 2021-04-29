@@ -1,3 +1,5 @@
+// sean at shanghai 2021
+
 package dnslite
 
 import "github.com/miekg/dns"
@@ -13,13 +15,17 @@ func (ns *NSHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 		rr[idx].Hdr.Name = req.Question[0].Name
 		rr[idx].Hdr.Rrtype = dns.TypeNS
 		rr[idx].Hdr.Class = dns.ClassINET
-		rr[idx].Hdr.Ttl = record.TTL
-		rr[idx].Ns = record.NS
+		rr[idx].Hdr.Ttl = record.Ttl
+		rr[idx].Ns = record.Ns
 		m.Answer = append(m.Answer, &rr[idx])
 	}
 	return m
 }
 
 func (ns *NSHandler) CheckRecord(record *DNSRecord) error {
+	is := GoodName(record.Ns)
+	if !is {
+		return ErrBadValue
+	}
 	return nil
 }

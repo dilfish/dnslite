@@ -1,3 +1,5 @@
+// sean 2021 at shanghai
+
 package dnslite
 
 import (
@@ -16,7 +18,7 @@ func (a *AHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 		rr[idx].Hdr.Name = req.Question[0].Name
 		rr[idx].Hdr.Rrtype = dns.TypeA
 		rr[idx].Hdr.Class = dns.ClassINET
-		rr[idx].Hdr.Ttl = record.TTL
+		rr[idx].Hdr.Ttl = record.Ttl
 		rr[idx].A = net.ParseIP(record.A)
 		m.Answer = append(m.Answer, &rr[idx])
 	}

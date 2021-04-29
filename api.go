@@ -30,8 +30,8 @@ type ApiHandler struct {
 	BadRequestMsg    []byte
 	NotSupportedType []byte
 	BadRecordValue   []byte
-	OkMsg            []byte
 	InsertErrMsg     []byte
+	BadMethodMsg []byte
 }
 
 func NewApiHandler(conf *MongoClientConfig) *ApiHandler {
@@ -45,10 +45,8 @@ func NewApiHandler(conf *MongoClientConfig) *ApiHandler {
 	mux.HandleFunc("/api/add.record", a.AddRecord)
 	mux.HandleFunc("/api/list.record", a.ListRecord)
 	mux.HandleFunc("/api/del.record", a.DelRecord)
+	a.Mux = mux
 	var ret DNSRecord
-	ret.Msg = "ok"
-	okMsg, _ := json.Marshal(ret)
-	a.OkMsg = okMsg
 	ret.Code = 1
 	ret.Msg = "bad request"
 	brMsg, _ := json.Marshal(ret)
@@ -65,6 +63,10 @@ func NewApiHandler(conf *MongoClientConfig) *ApiHandler {
 	ret.Msg = "insert error"
 	ieMsg, _ := json.Marshal(ret)
 	a.InsertErrMsg = ieMsg
+	ret.Code = 5
+	ret.Msg = "bad method"
+	bmMsg, _ := json.Marshal(ret)
+	a.BadMethodMsg = bmMsg
 	return &a
 }
 

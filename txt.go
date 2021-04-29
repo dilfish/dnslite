@@ -1,3 +1,5 @@
+// sean at shanghai 2021
+
 package dnslite
 
 import (
@@ -16,7 +18,7 @@ func (txt *TXTHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 		rr[idx].Hdr.Name = req.Question[0].Name
 		rr[idx].Hdr.Rrtype = dns.TypeA
 		rr[idx].Hdr.Class = dns.ClassINET
-		rr[idx].Hdr.Ttl = record.TTL
+		rr[idx].Hdr.Ttl = record.Ttl
 		rr[idx].Txt = strings.Split(record.Txt, "\"")
 		m.Answer = append(m.Answer, &rr[idx])
 	}
@@ -24,5 +26,8 @@ func (txt *TXTHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 }
 
 func (txt *TXTHandler) CheckRecord(record *DNSRecord) error {
+	if len(record.Txt) == 0 || len(record.Txt) > 2048 {
+		return ErrBadValue
+	}
 	return nil
 }

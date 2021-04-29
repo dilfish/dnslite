@@ -21,8 +21,8 @@ func UpDNS(conf *dnslite.MongoClientConfig) {
 
 // UpDoT
 func UpDoT(conf *dnslite.MongoClientConfig) {
-	cert := "/etc/letsencrypt/live/dilfish.dev-0001/fullchain.pem"
-	key := "/etc/letsencrypt/live/dilfish.dev-0001/privkey.pem"
+	cert := "./fullchain4.pem"
+	key := "./privkey4.pem"
 	h := dnslite.NewHandler(conf)
 	err := dns.ListenAndServeTLS(":853", cert, key, h)
 	if err != nil {

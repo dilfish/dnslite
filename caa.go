@@ -1,3 +1,5 @@
+// sean at shanghai 2021
+
 package dnslite
 
 import (
@@ -14,8 +16,8 @@ func (cca *CAAHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 		rr[idx].Hdr.Name = req.Question[0].Name
 		rr[idx].Hdr.Rrtype = dns.TypeCAA
 		rr[idx].Hdr.Class = dns.ClassINET
-		rr[idx].Hdr.Ttl = record.TTL
-		rr[idx].Value = record.CAA
+		rr[idx].Hdr.Ttl = record.Ttl
+		rr[idx].Value = record.Caa
 		rr[idx].Tag = record.Tag
 		rr[idx].Flag = record.Flag
 		m.Answer = append(m.Answer, &rr[idx])

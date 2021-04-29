@@ -1,29 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="824504b2-e674-493c-83af-08a5427caade" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/a.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/aaaa.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api_add.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api_del.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api_list.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cca.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cname.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/extra.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ns.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/proxy.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/txt.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/type.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/dnslite/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/dnslite/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dns.go" beforeDir="false" afterPath="$PROJECT_DIR$/dns.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dns_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/error.go" beforeDir="false" afterPath="$PROJECT_DIR$/error.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-    </list>
+    <list default="true" id="824504b2-e674-493c-83af-08a5427caade" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

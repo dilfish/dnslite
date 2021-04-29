@@ -29,12 +29,7 @@ func NewHandler(conf *MongoClientConfig) *Handler {
 
 func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	log.Print("Client:", w.RemoteAddr())
-	log.Print(", au:", r.Authoritative)
-	log.Print(", tr:", r.Truncated)
-	log.Print(", rd:", r.RecursionDesired)
-	log.Print(", ra:", r.RecursionAvailable)
-	log.Print(", ad:", r.AuthenticatedData)
-	log.Println(", cd:", r.CheckingDisabled)
+	log.Println("au:", r.Authoritative, "tr:", r.Truncated, "rd:", r.RecursionDesired, "ra:", r.RecursionAvailable, "ad:", r.AuthenticatedData, "cd:", r.CheckingDisabled)
 	err := ParseReqInfo(r)
 	if err != nil {
 		log.Println("bad dns request:", err)
@@ -58,8 +53,10 @@ func (h *Handler) GetRecord(req *dns.Msg) (*dns.Msg, error) {
 		return nil, err
 	}
 	if len(records) == 0 {
-		return nil, ErrNoSuchVal
+		log.Println("proxy to real dns")
+		return GetDataFromRealDNS(req)
 	}
+	log.Println("find from cache")
 	msg := TypeHandlerList[req.Question[0].Qtype].FillRecords(req, records)
 	return msg, nil
 }

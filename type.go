@@ -3,6 +3,7 @@ package dnslite
 import (
 	"log"
 	"strings"
+
 	"github.com/miekg/dns"
 )
 
@@ -12,12 +13,12 @@ type TypeHandler interface {
 }
 
 var TypeHandlerList = map[uint16]TypeHandler{
-	dns.TypeA: &AHandler{},
-	dns.TypeAAAA: &AAAAHandler{},
-	dns.TypeNS: &NSHandler{},
+	dns.TypeA:     &AHandler{},
+	dns.TypeAAAA:  &AAAAHandler{},
+	dns.TypeNS:    &NSHandler{},
 	dns.TypeCNAME: &CNAMEHandler{},
-	dns.TypeTXT: &TXTHandler{},
-	dns.TypeCAA: &CAAHandler{},
+	dns.TypeTXT:   &TXTHandler{},
+	dns.TypeCAA:   &CAAHandler{},
 }
 
 func CommonCheck(r *DNSRecord) error {
@@ -39,7 +40,7 @@ func GoodName(name string) bool {
 		return false
 	}
 	name = strings.ToLower(name)
-	validMap := map[rune]bool {
+	validMap := map[rune]bool{
 		'a': true,
 		'b': true,
 		'c': true,

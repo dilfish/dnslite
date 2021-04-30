@@ -32,6 +32,7 @@ type ApiHandler struct {
 	BadRecordValue   []byte
 	DBErrMsg         []byte
 	BadMethodMsg     []byte
+	TypeConflictMsg  []byte
 }
 
 func NewApiHandler(conf *MongoClientConfig) *ApiHandler {
@@ -67,6 +68,10 @@ func NewApiHandler(conf *MongoClientConfig) *ApiHandler {
 	ret.Msg = "bad method"
 	bmMsg, _ := json.Marshal(ret)
 	a.BadMethodMsg = bmMsg
+	ret.Code = 6
+	ret.Msg = "type conflict"
+	tcMsg, _ := json.Marshal(ret)
+	a.TypeConflictMsg = tcMsg
 	return &a
 }
 

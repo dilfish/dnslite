@@ -19,9 +19,9 @@ type DNSRecord struct {
 	Ns                string                `json:"ns,omitempty" bson:"ns,omitempty"`
 	Cname             string                `json:"cname,omitempty" bson:"cname,omitempty"`
 	Txt               string                `json:"txt,omitempty" bson:"txt,omitempty"`
-	Caa               string                `json:"caa,omitempty" bson:"caa,omitempty"`
-	Tag               string                `json:"tag,omitempty" bson:"tag,omitempty"`
-	Flag              uint8                 `json:"flag,omitempty" bson:"flag,omitempty"`
+	CAATag            string                `json:"caaTag,omitempty" bson:"caaTag,omitempty"`
+	CAAFlag           uint8                 `json:"CaaFlag,omitempty" bson:"caaFlag,omitempty"`
+	CAAValue          string                `json:"caaValue,omitempty" bson:"caaValue,omitempty"`
 	Code              int                   `json:"code,omitempty" bson:"code,omitempty"`
 	Msg               string                `json:"msg,omitempty" bson:"msg,omitempty"`
 	SVCBTarget        string                `json:"svcbTarget,omitempty" bson:"svcbTarget,omitempty"`

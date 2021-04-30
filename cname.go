@@ -29,5 +29,6 @@ func (c *CNAMEHandler) CheckRecord(record *DNSRecord) error {
 		log.Println("bad cname:", record.Cname)
 		return ErrBadValue
 	}
+	record.Cname = AppendDot(record.Cname)
 	return nil
 }

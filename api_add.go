@@ -7,6 +7,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/miekg/dns"
+	"go.mongodb.org/mongo-driver/bson"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -40,6 +43,20 @@ func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
 		w.Write(a.BadRecordValue)
 		log.Println("check record:", err)
 		return
+	}
+	conflictList := []uint16{dns.TypeNS, dns.TypeCNAME}
+	for _, tp := range conflictList {
+		// more than one ns records does not conflicts
+		if tp == dns.TypeNS && record.Type == dns.TypeNS {
+			continue
+		}
+		var ret []DNSRecord
+		err := a.DB.Find(bson.M{"name": record.Name, "type": tp}, &ret)
+		if err == nil && len(ret) > 0 {
+			log.Println("conflict", dns.Type(record.Type), "with", dns.Type(tp))
+			w.Write(a.TypeConflictMsg)
+			return
+		}
 	}
 	record.Id = primitive.NewObjectID()
 	err = a.DB.Insert(record)

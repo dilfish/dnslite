@@ -56,5 +56,6 @@ func (svcb *SVCBHandler) CheckRecord(record *DNSRecord) error {
 		log.Println("bad svcb target")
 		return ErrBadValue
 	}
+	record.SVCBTarget = AppendDot(record.SVCBTarget)
 	return nil
 }

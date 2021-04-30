@@ -34,9 +34,13 @@ func (a *ApiHandler) ListRecord(w http.ResponseWriter, r *http.Request) {
 	var ret []DNSRecord
 	err = a.DB.Find(bson.M{"name": record.Name, "type": record.Type}, &ret)
 	if err != nil {
-		log.Println("insert error:", err)
+		log.Println("find error:", err)
 		w.Write(a.DBErrMsg)
 		return
+	}
+	// empty result, make an empty slice 
+	if len(ret) == 0 {
+		ret = make([]DNSRecord, 0)
 	}
 	bt, _ := json.Marshal(ret)
 	w.Write(bt)

@@ -17,9 +17,9 @@ func (cca *CAAHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 		rr[idx].Hdr.Rrtype = dns.TypeCAA
 		rr[idx].Hdr.Class = dns.ClassINET
 		rr[idx].Hdr.Ttl = record.Ttl
-		rr[idx].Value = record.Caa
-		rr[idx].Tag = record.Tag
-		rr[idx].Flag = record.Flag
+		rr[idx].Value = record.CAAValue
+		rr[idx].Tag = record.CAATag
+		rr[idx].Flag = record.CAAFlag
 		m.Answer = append(m.Answer, &rr[idx])
 	}
 	return m

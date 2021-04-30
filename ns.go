@@ -32,5 +32,6 @@ func (ns *NSHandler) CheckRecord(record *DNSRecord) error {
 		log.Println("bad ns value:", record.Ns)
 		return ErrBadValue
 	}
+	record.Ns = AppendDot(record.Ns)
 	return nil
 }

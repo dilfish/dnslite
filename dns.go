@@ -46,14 +46,31 @@ func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		w.WriteMsg(h.ServFailMsg)
 		return
 	}
-	w.WriteMsg(msg)
+	err = w.WriteMsg(msg)
+	if err != nil {
+		log.Println("write msg error:", msg, err)
+	}
 }
 
 func (h *Handler) GetRecord(req *dns.Msg) (*dns.Msg, error) {
 	name := req.Question[0].Name
 	tp := dns.Type(req.Question[0].Qtype)
 	log.Println("name and type:", name, tp)
-	records, err := h.M.FindRecords(ReadRecordArgs{Name: name, Type: uint16(tp)})
+	// find cname first
+	records, err := h.M.FindRecords(ReadRecordArgs{Name: name, Type: dns.TypeCNAME})
+	if err == nil && len(records) > 0 {
+		log.Println("cname found, return")
+		msg := TypeHandlerList[dns.TypeCNAME].FillRecords(req, records)
+		return msg, nil
+	}
+	// then ns
+	records, err = h.M.FindRecords(ReadRecordArgs{Name: name, Type: dns.TypeNS})
+	if err == nil && len(records) > 0 {
+		log.Println("ns found, return")
+		msg := TypeHandlerList[dns.TypeNS].FillRecords(req, records)
+		return msg, nil
+	}
+	records, err = h.M.FindRecords(ReadRecordArgs{Name: name, Type: uint16(tp)})
 	if err != nil {
 		log.Println("find records error:", name, tp, err)
 		return nil, err

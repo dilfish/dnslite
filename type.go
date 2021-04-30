@@ -81,3 +81,10 @@ func GoodName(name string) bool {
 	}
 	return true
 }
+
+func AppendDot(name string) string {
+	if name[len(name)-1] != '.' {
+		name = name + "."
+	}
+	return name
+}

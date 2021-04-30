@@ -3,6 +3,7 @@
 package dnslite
 
 import (
+	"log"
 	"strings"
 
 	"github.com/miekg/dns"
@@ -16,7 +17,7 @@ func (txt *TXTHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 	rr := make([]dns.TXT, len(records))
 	for idx, record := range records {
 		rr[idx].Hdr.Name = req.Question[0].Name
-		rr[idx].Hdr.Rrtype = dns.TypeA
+		rr[idx].Hdr.Rrtype = dns.TypeTXT
 		rr[idx].Hdr.Class = dns.ClassINET
 		rr[idx].Hdr.Ttl = record.Ttl
 		rr[idx].Txt = strings.Split(record.Txt, "\"")
@@ -27,6 +28,7 @@ func (txt *TXTHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 
 func (txt *TXTHandler) CheckRecord(record *DNSRecord) error {
 	if len(record.Txt) == 0 || len(record.Txt) > 2048 {
+		log.Println("bad len of txt:", len(record.Txt))
 		return ErrBadValue
 	}
 	return nil

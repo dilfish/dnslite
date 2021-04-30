@@ -3,6 +3,7 @@
 package dnslite
 
 import (
+	"log"
 	"net"
 
 	"github.com/miekg/dns"
@@ -28,10 +29,12 @@ func (a *AHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 func (a *AHandler) CheckRecord(record *DNSRecord) error {
 	ip := net.ParseIP(record.A)
 	if ip == nil {
+		log.Println("check ipv4 error:", record.A)
 		return ErrBadValue
 	}
 	ip = ip.To4()
 	if ip == nil {
+		log.Println("not ipv4")
 		return ErrBadValue
 	}
 	return nil

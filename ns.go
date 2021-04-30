@@ -2,7 +2,11 @@
 
 package dnslite
 
-import "github.com/miekg/dns"
+import (
+	"log"
+
+	"github.com/miekg/dns"
+)
 
 type NSHandler struct{}
 
@@ -25,6 +29,7 @@ func (ns *NSHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 func (ns *NSHandler) CheckRecord(record *DNSRecord) error {
 	is := GoodName(record.Ns)
 	if !is {
+		log.Println("bad ns value:", record.Ns)
 		return ErrBadValue
 	}
 	return nil

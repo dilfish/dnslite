@@ -1,6 +1,8 @@
 package dnslite
 
 import (
+	"log"
+
 	"github.com/miekg/dns"
 )
 
@@ -24,6 +26,7 @@ func (c *CNAMEHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 func (c *CNAMEHandler) CheckRecord(record *DNSRecord) error {
 	is := GoodName(record.Cname)
 	if !is {
+		log.Println("bad cname:", record.Cname)
 		return ErrBadValue
 	}
 	return nil

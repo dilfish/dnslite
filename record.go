@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/miekg/dns"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -49,6 +48,7 @@ func NewRecordManager(conf *MongoClientConfig) *RecordManager {
 	var rm RecordManager
 	m := NewMongoClient(conf)
 	if m == nil {
+		log.Println("new record manager error")
 		return nil
 	}
 	rm.DB = m

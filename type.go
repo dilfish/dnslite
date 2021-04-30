@@ -19,16 +19,19 @@ var TypeHandlerList = map[uint16]TypeHandler{
 	dns.TypeCNAME: &CNAMEHandler{},
 	dns.TypeTXT:   &TXTHandler{},
 	dns.TypeCAA:   &CAAHandler{},
+	dns.TypeSVCB:  &SVCBHandler{},
 }
 
 func CommonCheck(r *DNSRecord) error {
 	if r.Name == "" {
+		log.Println("bad record name:", r.Name)
 		return ErrBadName
 	}
 	if r.Name[len(r.Name)-1] != '.' {
 		r.Name = r.Name + "."
 	}
 	if r.Ttl > 600 || r.Ttl < 1 {
+		log.Println("bad ttl:", r.Ttl)
 		return ErrBadTTL
 	}
 	return nil
@@ -36,7 +39,7 @@ func CommonCheck(r *DNSRecord) error {
 
 func GoodName(name string) bool {
 	if len(name) < 1 || len(name) > 255 {
-		log.Println("bad name", len(name), name)
+		log.Println("bad name:", len(name), name)
 		return false
 	}
 	name = strings.ToLower(name)

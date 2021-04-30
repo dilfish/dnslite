@@ -30,8 +30,8 @@ type ApiHandler struct {
 	BadRequestMsg    []byte
 	NotSupportedType []byte
 	BadRecordValue   []byte
-	InsertErrMsg     []byte
-	BadMethodMsg []byte
+	DBErrMsg         []byte
+	BadMethodMsg     []byte
 }
 
 func NewApiHandler(conf *MongoClientConfig) *ApiHandler {
@@ -60,9 +60,9 @@ func NewApiHandler(conf *MongoClientConfig) *ApiHandler {
 	brvMsg, _ := json.Marshal(ret)
 	a.BadRecordValue = brvMsg
 	ret.Code = 4
-	ret.Msg = "insert error"
+	ret.Msg = "db error"
 	ieMsg, _ := json.Marshal(ret)
-	a.InsertErrMsg = ieMsg
+	a.DBErrMsg = ieMsg
 	ret.Code = 5
 	ret.Msg = "bad method"
 	bmMsg, _ := json.Marshal(ret)

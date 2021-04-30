@@ -11,10 +11,11 @@ import (
 )
 
 func (a *ApiHandler) DelRecord(w http.ResponseWriter, r *http.Request) {
-        if r.Method != http.MethodPost {
-                w.Write(a.BadMethodMsg)
-                return
-        }
+	if r.Method != http.MethodPost {
+		log.Println("del record bad method:", r.Method)
+		w.Write(a.BadMethodMsg)
+		return
+	}
 	var record DNSRecord
 	err := a.UnjsonRequest(r, &record)
 	if err != nil {
@@ -23,6 +24,7 @@ func (a *ApiHandler) DelRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if record.Id.Hex() == "" {
+		log.Println("empty id for del record")
 		w.Write(a.BadRequestMsg)
 		return
 	}

@@ -3,6 +3,8 @@
 package dnslite
 
 import (
+	"log"
+
 	"github.com/miekg/dns"
 )
 
@@ -14,7 +16,7 @@ func (svcb *SVCBHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg
 	rr := make([]dns.SVCB, len(records))
 	for idx, record := range records {
 		rr[idx].Hdr.Name = req.Question[0].Name
-		rr[idx].Hdr.Rrtype = dns.TypeCAA
+		rr[idx].Hdr.Rrtype = dns.TypeSVCB
 		rr[idx].Hdr.Class = dns.ClassINET
 		rr[idx].Hdr.Ttl = record.Ttl
 		rr[idx].Target = record.SVCBTarget
@@ -46,5 +48,13 @@ func (svcb *SVCBHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg
 }
 
 func (svcb *SVCBHandler) CheckRecord(record *DNSRecord) error {
+	if record.SVCBPriority == 0 {
+		log.Println("bad svcb priority")
+		return ErrBadValue
+	}
+	if len(record.SVCBTarget) == 0 {
+		log.Println("bad svcb target")
+		return ErrBadValue
+	}
 	return nil
 }

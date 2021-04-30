@@ -19,25 +19,31 @@ func ParseReqInfo(r *dns.Msg) (err error) {
 }
 
 type Handler struct {
-	M *RecordManager
+	M           *RecordManager
+	ServFailMsg *dns.Msg
 }
 
 func NewHandler(conf *MongoClientConfig) *Handler {
 	m := NewRecordManager(conf)
-	return &Handler{M: m}
+	return &Handler{M: m, ServFailMsg: new(dns.Msg)}
 }
 
 func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	log.Print("Client:", w.RemoteAddr())
 	log.Println("au:", r.Authoritative, "tr:", r.Truncated, "rd:", r.RecursionDesired, "ra:", r.RecursionAvailable, "ad:", r.AuthenticatedData, "cd:", r.CheckingDisabled)
+	h.ServFailMsg.SetReply(r)
 	err := ParseReqInfo(r)
 	if err != nil {
+		h.ServFailMsg.MsgHdr.Rcode = dns.RcodeBadName
 		log.Println("bad dns request:", err)
+		w.WriteMsg(h.ServFailMsg)
 		return
 	}
 	msg, err := h.GetRecord(r)
 	if err != nil {
+		h.ServFailMsg.MsgHdr.Rcode = dns.RcodeServerFailure
 		log.Println("get record error:", err)
+		w.WriteMsg(h.ServFailMsg)
 		return
 	}
 	w.WriteMsg(msg)

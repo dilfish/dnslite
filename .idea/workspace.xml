@@ -3,17 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="824504b2-e674-493c-83af-08a5427caade" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/a.go" beforeDir="false" afterPath="$PROJECT_DIR$/a.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api_add.go" beforeDir="false" afterPath="$PROJECT_DIR$/api_add.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api_del.go" beforeDir="false" afterPath="$PROJECT_DIR$/api_del.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api_list.go" beforeDir="false" afterPath="$PROJECT_DIR$/api_list.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cname.go" beforeDir="false" afterPath="$PROJECT_DIR$/cname.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ns.go" beforeDir="false" afterPath="$PROJECT_DIR$/ns.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/record.go" beforeDir="false" afterPath="$PROJECT_DIR$/record.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/svcb.go" beforeDir="false" afterPath="$PROJECT_DIR$/svcb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/txt.go" beforeDir="false" afterPath="$PROJECT_DIR$/txt.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/type.go" beforeDir="false" afterPath="$PROJECT_DIR$/type.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dns.go" beforeDir="false" afterPath="$PROJECT_DIR$/dns.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

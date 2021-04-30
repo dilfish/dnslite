@@ -21,12 +21,17 @@ type MongoClientConfig struct {
 }
 
 func NewMongoClient(conf *MongoClientConfig) *MongoClient {
-	client, err := mongo.NewClient(options.Client().ApplyURI(conf.Addr))
+	client, err := mongo.NewClient(options.Client().
+		ApplyURI(conf.Addr).
+		SetConnectTimeout(time.Second * 2).
+		SetHeartbeatInterval(time.Second * 10).
+		SetSocketTimeout(time.Second * 2).
+		SetServerSelectionTimeout(time.Second *2))
 	if err != nil {
 		log.Println("new client error:", conf.Addr, err)
 		return nil
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	err = client.Connect(ctx)
 	if err != nil {

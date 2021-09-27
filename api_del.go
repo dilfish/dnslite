@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (a *ApiHandler) DelRecord(w http.ResponseWriter, r *http.Request) {
@@ -23,12 +21,12 @@ func (a *ApiHandler) DelRecord(w http.ResponseWriter, r *http.Request) {
 		w.Write(a.BadRequestMsg)
 		return
 	}
-	if record.Id.Hex() == "" {
+	if record.Name == "" || record.Type == 0 {
 		log.Println("empty id for del record")
 		w.Write(a.BadRequestMsg)
 		return
 	}
-	a.DB.Del(bson.M{"_id": record.Id})
+	a.DB.Del(record.Name, record.Type)
 	bt, _ := json.Marshal(record)
 	w.Write(bt)
 }

@@ -19,13 +19,19 @@ func ParseReqInfo(r *dns.Msg) (err error) {
 }
 
 type Handler struct {
-	M           *RecordManager
+	M           DataManagerI
 	ServFailMsg *dns.Msg
 }
 
-func NewHandler(conf *MongoClientConfig) *Handler {
-	m := NewRecordManager(conf)
-	return &Handler{M: m, ServFailMsg: new(dns.Msg)}
+func NewHandler(conf *Config) *Handler {
+	var h Handler
+	h.ServFailMsg = new(dns.Msg)
+	if conf.UsingMemDB {
+		h.M = NewMemDB()
+	} else {
+		h.M = NewMongoClient(&conf.MongoClientConfig)
+	}
+	return &h
 }
 
 func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
@@ -57,20 +63,20 @@ func (h *Handler) GetRecord(req *dns.Msg) (*dns.Msg, error) {
 	tp := dns.Type(req.Question[0].Qtype)
 	log.Println("name and type:", name, tp)
 	// find cname first
-	records, err := h.M.FindRecords(ReadRecordArgs{Name: name, Type: dns.TypeCNAME})
+	records, err := h.M.Find(name, dns.TypeCNAME)
 	if err == nil && len(records) > 0 {
 		log.Println("cname found, return")
 		msg := TypeHandlerList[dns.TypeCNAME].FillRecords(req, records)
 		return msg, nil
 	}
 	// then ns
-	records, err = h.M.FindRecords(ReadRecordArgs{Name: name, Type: dns.TypeNS})
+	records, err = h.M.Find(name, dns.TypeNS)
 	if err == nil && len(records) > 0 {
 		log.Println("ns found, return")
 		msg := TypeHandlerList[dns.TypeNS].FillRecords(req, records)
 		return msg, nil
 	}
-	records, err = h.M.FindRecords(ReadRecordArgs{Name: name, Type: uint16(tp)})
+	records, err = h.M.Find(name, uint16(tp))
 	if err != nil {
 		log.Println("find records error:", name, tp, err)
 		return nil, err

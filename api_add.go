@@ -8,9 +8,6 @@ import (
 	"net/http"
 
 	"github.com/miekg/dns"
-	"go.mongodb.org/mongo-driver/bson"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
@@ -50,15 +47,13 @@ func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
 		if tp == dns.TypeNS && record.Type == dns.TypeNS {
 			continue
 		}
-		var ret []DNSRecord
-		err := a.DB.Find(bson.M{"name": record.Name, "type": tp}, &ret)
+		ret, err := a.DB.Find(record.Name, tp)
 		if err == nil && len(ret) > 0 {
 			log.Println("conflict", dns.Type(record.Type), "with", dns.Type(tp))
 			w.Write(a.TypeConflictMsg)
 			return
 		}
 	}
-	record.Id = primitive.NewObjectID()
 	err = a.DB.Insert(record)
 	if err != nil {
 		log.Println("db insert error:", err)

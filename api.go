@@ -26,7 +26,7 @@ func (a *ApiHandler) UnjsonRequest(r *http.Request, v interface{}) error {
 
 type ApiHandler struct {
 	Mux              http.Handler
-	DB               *MongoClient
+	DB               DataManagerI
 	BadRequestMsg    []byte
 	NotSupportedType []byte
 	BadRecordValue   []byte
@@ -35,13 +35,16 @@ type ApiHandler struct {
 	TypeConflictMsg  []byte
 }
 
-func NewApiHandler(conf *MongoClientConfig) *ApiHandler {
+func NewApiHandler(conf *Config) *ApiHandler {
 	var a ApiHandler
-	m := NewMongoClient(conf)
+	m := NewMongoClient(&conf.MongoClientConfig)
 	if m == nil {
 		return nil
 	}
 	a.DB = m
+	if conf.UsingMemDB {
+		a.DB = NewMemDB()
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/add.record", a.AddRecord)
 	mux.HandleFunc("/api/list.record", a.ListRecord)

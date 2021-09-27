@@ -3,6 +3,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 
@@ -10,8 +11,10 @@ import (
 	"github.com/miekg/dns"
 )
 
+var FlagUsingMemdb = flag.Bool("m", false, "using memory db")
+
 // UpDNS create new dns service
-func UpDNS(conf *dnslite.MongoClientConfig) {
+func UpDNS(conf *dnslite.Config) {
 	h := dnslite.NewHandler(conf)
 	err := dns.ListenAndServe(":53", "udp", h)
 	if err != nil {
@@ -20,7 +23,7 @@ func UpDNS(conf *dnslite.MongoClientConfig) {
 }
 
 // UpDoT
-func UpDoT(conf *dnslite.MongoClientConfig) {
+func UpDoT(conf *dnslite.Config) {
 	cert := "./fullchain4.pem"
 	key := "./privkey4.pem"
 	h := dnslite.NewHandler(conf)
@@ -32,10 +35,12 @@ func UpDoT(conf *dnslite.MongoClientConfig) {
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	var conf dnslite.MongoClientConfig
+	flag.Parse()
+	var conf dnslite.Config
 	conf.Addr = "mongodb://localhost:27017"
 	conf.DB = "dnslite"
 	conf.Coll = "records"
+	conf.UsingMemDB = *FlagUsingMemdb
 	go UpDoT(&conf)
 	go UpDNS(&conf)
 	api := dnslite.NewApiHandler(&conf)

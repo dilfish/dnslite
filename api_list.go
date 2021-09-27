@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (a *ApiHandler) ListRecord(w http.ResponseWriter, r *http.Request) {
@@ -31,14 +29,13 @@ func (a *ApiHandler) ListRecord(w http.ResponseWriter, r *http.Request) {
 		w.Write(a.BadRecordValue)
 		return
 	}
-	var ret []DNSRecord
-	err = a.DB.Find(bson.M{"name": record.Name, "type": record.Type}, &ret)
+	ret, err := a.DB.Find(record.Name, record.Type)
 	if err != nil {
 		log.Println("find error:", err)
 		w.Write(a.DBErrMsg)
 		return
 	}
-	// empty result, make an empty slice 
+	// empty result, make an empty slice
 	if len(ret) == 0 {
 		ret = make([]DNSRecord, 0)
 	}

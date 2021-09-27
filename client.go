@@ -5,6 +5,10 @@ import (
 	"log"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"go.mongodb.org/mongo-driver/bson"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -26,7 +30,7 @@ func NewMongoClient(conf *MongoClientConfig) *MongoClient {
 		SetConnectTimeout(time.Second * 2).
 		SetHeartbeatInterval(time.Second * 10).
 		SetSocketTimeout(time.Second * 2).
-		SetServerSelectionTimeout(time.Second *2))
+		SetServerSelectionTimeout(time.Second * 2))
 	if err != nil {
 		log.Println("new client error:", conf.Addr, err)
 		return nil
@@ -46,8 +50,9 @@ func NewMongoClient(conf *MongoClientConfig) *MongoClient {
 	}
 }
 
-func (mc *MongoClient) Insert(data interface{}) error {
+func (mc *MongoClient) Insert(data DNSRecord) error {
 	ctx := context.Background()
+	data.Id = primitive.NewObjectID().Hex()
 	_, err := mc.C.InsertOne(ctx, data)
 	if err != nil {
 		log.Println("insert data error:", data, err)
@@ -56,26 +61,29 @@ func (mc *MongoClient) Insert(data interface{}) error {
 	return nil
 }
 
-func (mc *MongoClient) Find(filter, ret interface{}) error {
+func (mc *MongoClient) Find(name string, tp uint16) ([]DNSRecord, error) {
 	ctx := context.Background()
+	filter := bson.M{"name": name, "type": tp}
 	c, err := mc.C.Find(ctx, filter)
 	if err != nil {
 		log.Println("find error:", err)
-		return err
+		return nil, err
 	}
-	err = c.All(ctx, ret)
+	var ret []DNSRecord
+	err = c.All(ctx, &ret)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil
+			return nil, nil
 		}
 		log.Println("find one error:", filter, err)
-		return err
+		return nil, err
 	}
-	return nil
+	return nil, nil
 }
 
-func (mc *MongoClient) Del(filter interface{}) error {
+func (mc *MongoClient) Del(name string, tp uint16) error {
 	ctx := context.Background()
+	filter := bson.M{"name": name, "type": tp}
 	_, err := mc.C.DeleteOne(ctx, filter)
 	if err != nil {
 		log.Println("delete one error:", filter, err)

@@ -15,7 +15,7 @@ package dnslite
 // add NS record
 // curl -X POST -d '{"name":"www.dilfish.dev", "type":2, "ttl":100, "ns":"abcde.com"}' http://127.0.0.1:8085/api/add.record
 // add CAA record
-// curl -X POST -d '{"name":"www.dilfish.dev", "type":257, "ttl":100, "caaTag":"issue", "caaFlag":1, "caaValue":"111"}' http://127.0.0.1:8085/api/add.record 
+// curl -X POST -d '{"name":"www.dilfish.dev", "type":257, "ttl":100, "caaTag":"issue", "caaFlag":1, "caaValue":"111"}' http://127.0.0.1:8085/api/add.record
 // add SVCB record
 // curl -X POST -d '{"name":"svcb.dilfish.dev","type":64, "svcbAlpn":{"Alpn":["a","b"]},"svcbIPv6Hint":{"Hint":["1::1"]},"svcbIPv4Hint":{"Hint":["1.1.1.1"]},"ttl":100,"svcbPriority":1,"svcbTarget":"dilfish.dev"}' http://127.0.0.1:8085/api/add.record
 
@@ -23,4 +23,4 @@ package dnslite
 // curl -X POST -d '{"name":"dilfish.dev","type":1}' http://127.0.0.1:8085/api/list.record
 
 // del a record
-// curl -X POST -d '{"_id":"608bde64726e4acc0e806d0a"}' http://127.0.0.1:8085/api/del.record
+// curl -X POST -d '{"name":"dilfish.dev", "type":1}' http://127.0.0.1:8085/api/del.record

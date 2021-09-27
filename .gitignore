@@ -14,3 +14,4 @@
 .glide/
 
 app/dnslite/dnslite
+.idea/workspace.xml

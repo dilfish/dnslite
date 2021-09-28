@@ -28,6 +28,31 @@ func MsgToRecord(msg *dns.Msg) []DNSRecord {
 		t := a.Header().Rrtype
 		_, ok := TypeHandlerList[t]
 		if !ok {
+			log.Println("no such type to parse:", t)
+			continue
+		}
+		record := TypeHandlerList[t].RRToRecord(a)
+		record.Name = a.Header().Name
+		record.Type = a.Header().Rrtype
+		list = append(list, record)
+	}
+	for _, a := range msg.Ns {
+		t := a.Header().Rrtype
+		_, ok := TypeHandlerList[t]
+		if !ok {
+			log.Println("no such type to parse:", t)
+			continue
+		}
+		record := TypeHandlerList[t].RRToRecord(a)
+		record.Name = a.Header().Name
+		record.Type = a.Header().Rrtype
+		list = append(list, record)
+	}
+	for _, a := range msg.Extra {
+		t := a.Header().Rrtype
+		_, ok := TypeHandlerList[t]
+		if !ok {
+			log.Println("no such type to parse:", t)
 			continue
 		}
 		record := TypeHandlerList[t].RRToRecord(a)

@@ -22,14 +22,33 @@ type DNSResult struct {
 	Result  []DNSRecord `json:"result"`
 }
 
-func TypeStrToInt(tp string) uint16 {
-	switch tp {
-	case "A":
-		return dns.TypeA
-	case "AAAA":
-		return dns.TypeAAAA
+func MsgToRecord(msg *dns.Msg) []DNSRecord {
+	list := make([]DNSRecord, 0)
+	for _, a := range msg.Answer {
+		t := a.Header().Rrtype
+		_, ok := TypeHandlerList[t]
+		if !ok {
+			continue
+		}
+		record := TypeHandlerList[t].RRToRecord(a)
+		record.Name = a.Header().Name
+		record.Type = a.Header().Rrtype
+		list = append(list, record)
 	}
-	return dns.TypeNone
+	return list
+}
+
+func HTTPProxy(name string, tp uint16) ([]DNSRecord, error) {
+	msg := new(dns.Msg)
+	msg.Id = dns.Id()
+	msg.RecursionDesired = true
+	msg.Question = make([]dns.Question, 1)
+	msg.Question[0] = dns.Question{Name: name, Qtype: tp, Qclass: dns.ClassINET}
+	dret, err := GetDataFromRealDNS(msg)
+	if err != nil {
+		return nil, err
+	}
+	return MsgToRecord(dret), nil
 }
 
 func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -49,19 +68,12 @@ func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	rs, err := h.M.Find(name, t)
 	if err != nil {
 		log.Println("find error:", name, t, err)
-		msg := new(dns.Msg)
-		msg.Id = dns.Id()
-		msg.RecursionDesired = true
-		msg.Question = make([]dns.Question, 1)
-		msg.Question[0] = dns.Question{Name: name, Qtype: t, Qclass: dns.ClassINET}
-		dret, err := GetDataFromRealDNS(msg)
+		rs, err = HTTPProxy(name, t)
 		if err != nil {
 			log.Println("get proxy error:", err)
 			w.Write([]byte("get proxy error"))
 			return
 		}
-		w.Write([]byte(dret.String()))
-		return
 	}
 	var ret DNSResult
 	ret.Result = rs

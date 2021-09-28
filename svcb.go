@@ -22,25 +22,25 @@ func (svcb *SVCBHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg
 		rr[idx].Target = record.SVCBTarget
 		rr[idx].Priority = record.SVCBPriority
 		if len(record.SVCBIPv4Hint.Hint) != 0 {
-			rr[idx].Value = append(rr[idx].Value, &record.SVCBIPv4Hint)
+			rr[idx].Value = append(rr[idx].Value, record.SVCBIPv4Hint)
 		}
 		if len(record.SVCBIPv6Hint.Hint) != 0 {
-			rr[idx].Value = append(rr[idx].Value, &record.SVCBIPv6Hint)
+			rr[idx].Value = append(rr[idx].Value, record.SVCBIPv6Hint)
 		}
 		if len(record.SVCBAlpn.Alpn) != 0 {
-			rr[idx].Value = append(rr[idx].Value, &record.SVCBAlpn)
+			rr[idx].Value = append(rr[idx].Value, record.SVCBAlpn)
 		}
 		if record.SVCBPort.Port != 0 {
-			rr[idx].Value = append(rr[idx].Value, &record.SVCBPort)
+			rr[idx].Value = append(rr[idx].Value, record.SVCBPort)
 		}
 		if len(record.SVCBMandatory.Code) != 0 {
-			rr[idx].Value = append(rr[idx].Value, &record.SVCBMandatory)
+			rr[idx].Value = append(rr[idx].Value, record.SVCBMandatory)
 		}
 		if len(record.SVCBECHConfig.ECH) != 0 {
-			rr[idx].Value = append(rr[idx].Value, &record.SVCBECHConfig)
+			rr[idx].Value = append(rr[idx].Value, record.SVCBECHConfig)
 		}
 		if len(rr[idx].Value) == 0 {
-			rr[idx].Value = append(rr[idx].Value, &record.SVCBNoDefaultAlpn)
+			rr[idx].Value = append(rr[idx].Value, record.SVCBNoDefaultAlpn)
 		}
 		m.Answer = append(m.Answer, &rr[idx])
 	}
@@ -58,4 +58,9 @@ func (svcb *SVCBHandler) CheckRecord(record *DNSRecord) error {
 	}
 	record.SVCBTarget = AppendDot(record.SVCBTarget)
 	return nil
+}
+
+func (svcb *SVCBHandler) RRToRecord(msg dns.RR) DNSRecord {
+	var record DNSRecord
+	return record
 }

@@ -33,3 +33,11 @@ func (txt *TXTHandler) CheckRecord(record *DNSRecord) error {
 	}
 	return nil
 }
+
+func (txt *TXTHandler) RRToRecord(msg dns.RR) DNSRecord {
+	var record DNSRecord
+	v := msg.(*dns.TXT)
+	record.Txt = strings.Join(v.Txt, " ")
+	record.Ttl = v.Hdr.Ttl
+	return record
+}

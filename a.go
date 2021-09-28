@@ -39,3 +39,11 @@ func (a *AHandler) CheckRecord(record *DNSRecord) error {
 	}
 	return nil
 }
+
+func (a *AHandler) RRToRecord(msg dns.RR) DNSRecord {
+	var record DNSRecord
+	v := msg.(*dns.A)
+	record.A = v.A.String()
+	record.Ttl = v.Hdr.Ttl
+	return record
+}

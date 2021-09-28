@@ -32,3 +32,11 @@ func (c *CNAMEHandler) CheckRecord(record *DNSRecord) error {
 	record.Cname = AppendDot(record.Cname)
 	return nil
 }
+
+func (c *CNAMEHandler) RRToRecord(msg dns.RR) DNSRecord {
+	var record DNSRecord
+	v := msg.(*dns.CNAME)
+	record.Cname = v.Target
+	record.Ttl = v.Hdr.Ttl
+	return record
+}

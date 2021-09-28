@@ -35,3 +35,11 @@ func (ns *NSHandler) CheckRecord(record *DNSRecord) error {
 	record.Ns = AppendDot(record.Ns)
 	return nil
 }
+
+func (ns *NSHandler) RRToRecord(msg dns.RR) DNSRecord {
+	var record DNSRecord
+	v := msg.(*dns.NS)
+	record.Ns = v.Ns
+	record.Ttl = v.Hdr.Ttl
+	return record
+}

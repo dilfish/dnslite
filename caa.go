@@ -28,3 +28,8 @@ func (cca *CAAHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 func (caa *CAAHandler) CheckRecord(record *DNSRecord) error {
 	return nil
 }
+
+func (caa *CAAHandler) RRToRecord(msg dns.RR) DNSRecord {
+	var record DNSRecord
+	return record
+}

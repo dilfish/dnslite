@@ -1,4 +1,4 @@
-package dnslite
+package main
 
 type DataManagerI interface {
 	Find(name string, tp uint16) (ret []DNSRecord, err error)

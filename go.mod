@@ -1,15 +1,15 @@
 module github.com/dilfish/dnslite
 
+go 1.17
+
 require (
-	github.com/miekg/dns v1.1.41
-	go.mongodb.org/mongo-driver v1.5.1
+	github.com/miekg/dns v1.1.43
+	go.mongodb.org/mongo-driver v1.7.2
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.34.28 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.9.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
@@ -22,5 +22,3 @@ require (
 	golang.org/x/sys v0.0.0-20210303074136-134d130e1a04 // indirect
 	golang.org/x/text v0.3.5 // indirect
 )
-
-go 1.17

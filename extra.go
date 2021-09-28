@@ -1,4 +1,7 @@
-package dnslite
+// sean at shanghai
+// 2021
+
+package main
 
 import (
 	"log"

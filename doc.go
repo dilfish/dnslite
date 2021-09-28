@@ -2,7 +2,7 @@
 
 // dnslite provides a simple dns service and api
 
-package dnslite
+package main
 
 // add AAAA record
 // curl -X POST -d '{"name":"dilfish.dev", "type":28, "ttl":100, "value":"2001:470:23:976::2"}' http://127.0.0.1:8085/api/add.record

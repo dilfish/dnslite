@@ -1,4 +1,4 @@
-package dnslite
+package main
 
 import "errors"
 

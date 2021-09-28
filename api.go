@@ -1,6 +1,6 @@
 // Copyright 2018 Sean.ZH
 
-package dnslite
+package main
 
 import (
 	"encoding/json"

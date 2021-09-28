@@ -1,6 +1,6 @@
 // Copyright 2021 Sean.ZH
 
-package dnslite
+package main
 
 import (
 	"encoding/json"
@@ -22,6 +22,9 @@ func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
 		log.Println("unjson req error:", err)
 		w.Write(a.BadRequestMsg)
 		return
+	}
+	if record.Name[len(record.Name)-1] != '.' {
+		record.Name = record.Name + "."
 	}
 	cf, ok := TypeHandlerList[record.Type]
 	if !ok {

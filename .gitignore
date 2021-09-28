@@ -13,5 +13,7 @@
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
 
-app/dnslite/dnslite
+dnslite
 .idea/workspace.xml
+fullchain4.pem
+privkey4.pem

@@ -1,6 +1,6 @@
 // sean at shanghai 2021
 
-package dnslite
+package main
 
 import (
 	"net"

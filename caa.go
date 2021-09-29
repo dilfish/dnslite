@@ -3,6 +3,8 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/miekg/dns"
 )
 
@@ -26,10 +28,17 @@ func (cca *CAAHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 }
 
 func (caa *CAAHandler) CheckRecord(record *DNSRecord) error {
+	if record.CAAValue == "" || record.CAATag == "" || record.CAAFlag == 0 {
+		return errors.New("bad caa tag")
+	}
 	return nil
 }
 
 func (caa *CAAHandler) RRToRecord(msg dns.RR) DNSRecord {
 	var record DNSRecord
+	v := msg.(*dns.CAA)
+	record.CAAValue = v.Value
+	record.CAATag = v.Tag
+	record.CAAFlag = v.Flag
 	return record
 }

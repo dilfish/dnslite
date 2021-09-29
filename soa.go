@@ -14,7 +14,7 @@ func (soa *SoaHandler) FillRecords(req *dns.Msg, records []DNSRecord) *dns.Msg {
 	rr := make([]dns.SOA, len(records))
 	for idx, record := range records {
 		rr[idx].Hdr.Name = req.Question[0].Name
-		rr[idx].Hdr.Rrtype = dns.TypeSVCB
+		rr[idx].Hdr.Rrtype = dns.TypeSOA
 		rr[idx].Hdr.Class = dns.ClassINET
 		rr[idx].Hdr.Ttl = record.Ttl
 		rr[idx].Ns = record.SoaNs

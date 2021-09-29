@@ -62,5 +62,30 @@ func (svcb *SVCBHandler) CheckRecord(record *DNSRecord) error {
 
 func (svcb *SVCBHandler) RRToRecord(msg dns.RR) DNSRecord {
 	var record DNSRecord
+	s := msg.(*dns.SVCB)
+	record.SVCBPriority = s.Priority
+	record.SVCBTarget = s.Target
+	for _, v := range s.Value {
+		switch v.Key() {
+		case dns.SVCB_IPV6HINT:
+			vv := v.(*dns.SVCBIPv6Hint)
+			record.SVCBIPv6Hint = vv
+		case dns.SVCB_IPV4HINT:
+			vv := v.(*dns.SVCBIPv4Hint)
+			record.SVCBIPv4Hint = vv
+		case dns.SVCB_ALPN:
+			vv := v.(*dns.SVCBAlpn)
+			record.SVCBAlpn = vv
+		case dns.SVCB_PORT:
+			vv := v.(*dns.SVCBPort)
+			record.SVCBPort = vv
+		case dns.SVCB_MANDATORY:
+			vv := v.(*dns.SVCBMandatory)
+			record.SVCBMandatory = vv
+		case dns.SVCB_ECHCONFIG:
+			vv := v.(*dns.SVCBECHConfig)
+			record.SVCBECHConfig = vv
+		}
+	}
 	return record
 }

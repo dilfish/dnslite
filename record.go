@@ -38,4 +38,5 @@ type DNSRecord struct {
 	SoaMinttl         uint32                 `json:"soaMinttl,omitempty" bson:"soaMinttl,omitempty"`
 	MxPreference      uint16                 `json:"mxPreference,omitempty" bson:"mxPreference,omitempty"`
 	MxMx              string                 `json:"mxMx,omitempty" bson:"MxMx,omitempty"`
+	Ptr               string                 `json:"ptr,omitempty" bson:"ptr,omitempty"`
 }

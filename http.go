@@ -73,35 +73,52 @@ func HTTPProxy(name string, tp uint16) ([]DNSRecord, error) {
 	if err != nil {
 		return nil, err
 	}
+	if *FlagDebugMode {
+		log.Println("http get", dret)
+	}
 	return MsgToRecord(dret), nil
 }
 
-func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	domain := r.Form["domain"]
-	tp := r.Form["type"]
+func (h *HTTPHandler) getRecord(domain, tp []string) DNSResult {
+	var result DNSResult
 	if len(domain) < 1 || len(tp) < 1 {
-		w.Write([]byte("please input domain and type"))
-		return
+		log.Println("bad domain or type:", domain, tp)
+		result.Code = 1
+		result.Message = "please input domain and type"
+		return result
 	}
 	t := TypeStrToInt(tp[0])
+	if t == dns.TypeNone {
+		log.Println("bad request type:", tp[0])
+		result.Code = 2
+		result.Message = "request type not supported:" + tp[0]
+		return result
+	}
 	name := domain[0]
 	if name[len(name)-1] != '.' {
 		name = name + "."
 	}
 	log.Println("request is", name, t)
 	rs, err := h.M.Find(name, t)
-	if err != nil {
+	if err != nil || len(rs) == 0 {
 		log.Println("find error:", name, t, err)
 		rs, err = HTTPProxy(name, t)
 		if err != nil {
 			log.Println("get proxy error:", err)
-			w.Write([]byte("get proxy error"))
-			return
+			result.Code = 3
+			result.Message = "get proxy error:" + err.Error()
+			return result
 		}
 	}
-	var ret DNSResult
-	ret.Result = rs
+	result.Result = rs
+	return result
+}
+
+func (h *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	domain := r.Form["domain"]
+	tp := r.Form["type"]
+	ret := h.getRecord(domain, tp)
 	bt, _ := json.Marshal(ret)
 	w.Write(bt)
 }

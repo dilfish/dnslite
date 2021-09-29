@@ -22,6 +22,7 @@ var TypeHandlerList = map[uint16]TypeHandler{
 	dns.TypeCAA:   &CAAHandler{},
 	dns.TypeSVCB:  &SVCBHandler{},
 	dns.TypeSOA:   &SoaHandler{},
+	dns.TypeMX:    &MxHandler{},
 }
 
 func CommonCheck(r *DNSRecord) error {
@@ -110,6 +111,8 @@ func TypeStrToInt(tp string) uint16 {
 		return dns.TypeSVCB
 	case "SOA":
 		return dns.TypeSOA
+	case "MX":
+		return dns.TypeMX
 	}
 	return dns.TypeNone
 }

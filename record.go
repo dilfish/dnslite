@@ -29,11 +29,13 @@ type DNSRecord struct {
 	SVCBIPv4Hint      *dns.SVCBIPv4Hint      `json:"svcbIPv4Hint,omitempty" bson:"svcbIPv4Hint,omitempty"`
 	SVCBIPv6Hint      *dns.SVCBIPv6Hint      `json:"svcbIPv6Hint,omitempty" bson:"svcbIPv6Hint,omitempty"`
 	SVCBNoDefaultAlpn *dns.SVCBNoDefaultAlpn `json:"svcbNoDefaultAlpn,omitempty" bson:"svcbNoDefaultAlpn,omitempty"`
-	SoaNs             string                 `json:"soaNs,omitempty" bson:"soaNs"`
-	SoaMbox           string                 `json:"soaMbox,omitempty" bson:"soaMbox"`
-	SoaSerial         uint32                 `json:"soaSerial,omitempty" bson:"soaSerial"`
-	SoaRefresh        uint32                 `json:"soaRefresh,omitempty" bson:"soaRefresh"`
-	SoaRetry          uint32                 `json:"soaRetry,omitempty" bson:"soaRetry"`
-	SoaExpire         uint32                 `json:"soaExpire,omitempty" bson:"soaExpire"`
-	SoaMinttl         uint32                 `json:"soaMinttl,omitempty" bson:"soaMinttl"`
+	SoaNs             string                 `json:"soaNs,omitempty" bson:"soaNs,omitempty"`
+	SoaMbox           string                 `json:"soaMbox,omitempty" bson:"soaMbox,omitempty"`
+	SoaSerial         uint32                 `json:"soaSerial,omitempty" bson:"soaSerial,omitempty"`
+	SoaRefresh        uint32                 `json:"soaRefresh,omitempty" bson:"soaRefresh,omitempty"`
+	SoaRetry          uint32                 `json:"soaRetry,omitempty" bson:"soaRetry,omitempty"`
+	SoaExpire         uint32                 `json:"soaExpire,omitempty" bson:"soaExpire,omitempty"`
+	SoaMinttl         uint32                 `json:"soaMinttl,omitempty" bson:"soaMinttl,omitempty"`
+	MxPreference      uint16                 `json:"mxPreference,omitempty" bson:"mxPreference,omitempty"`
+	MxMx              string                 `json:"mxMx,omitempty" bson:"MxMx,omitempty"`
 }

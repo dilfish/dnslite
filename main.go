@@ -13,6 +13,7 @@ import (
 var FlagUsingMemdb = flag.Bool("m", false, "using memory db")
 var FlagUsingDnsOverTls = flag.Bool("t", false, "using dns over tls")
 var FlagHTTPPort = flag.Int("p", 0, "http port")
+var FlagDebugMode = flag.Bool("d", false, "debug mode")
 
 // UpDNS create new dns service
 func UpDNS(conf *Config) {

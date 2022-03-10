@@ -69,7 +69,7 @@ func HTTPProxy(name string, tp uint16) ([]DNSRecord, error) {
 	msg.RecursionDesired = true
 	msg.Question = make([]dns.Question, 1)
 	msg.Question[0] = dns.Question{Name: name, Qtype: tp, Qclass: dns.ClassINET}
-	dret, err := GetDataFromRealDNS(msg)
+	dret, err := GetDataFromRealDNS(msg, false)
 	if err != nil {
 		return nil, err
 	}

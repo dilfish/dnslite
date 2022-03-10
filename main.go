@@ -26,8 +26,8 @@ func UpDNS(conf *Config) {
 
 // UpDoT
 func UpDoT(conf *Config) {
-	cert := "./fullchain4.pem"
-	key := "./privkey4.pem"
+	cert := "/etc/letsencrypt/live/dilfish.dev-0001/fullchain.pem"
+	key := "/etc/letsencrypt/live/dilfish.dev-0001/privkey.pem"
 	h := NewHandler(conf)
 	err := dns.ListenAndServeTLS(":853", cert, key, h)
 	if err != nil {

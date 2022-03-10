@@ -83,7 +83,8 @@ func (h *Handler) GetRecord(req *dns.Msg) (*dns.Msg, error) {
 	}
 	if len(records) == 0 {
 		log.Println("proxy to real dns")
-		return GetDataFromRealDNS(req)
+		usingTls := IfProxyTls(name, tp)
+		return GetDataFromRealDNS(req, usingTls)
 	}
 	log.Println("find from cache")
 	msg := TypeHandlerList[req.Question[0].Qtype].FillRecords(req, records)

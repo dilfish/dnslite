@@ -35,6 +35,7 @@ func GetDataFromRealDNS(req *dns.Msg, withTLS bool) (*dns.Msg, error) {
 			c = &dns.Client{Net: "tcp-tls"}
 			a = addr + ":853"
 		}
+		log.Println("proxy req to", req.Question[0].Name, req.Question[0].Qtype, a)
 		ret, _, err := c.ExchangeContext(context.Background(), req, a)
 		if err == nil {
 			return ret, nil

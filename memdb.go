@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"sync"
 )
 
@@ -21,11 +20,11 @@ func (m *MemDB) Find(name string, tp uint16) (ret []DNSRecord, err error) {
 	defer m.lock.Unlock()
 	v, ok := m.mp[name]
 	if !ok {
-		return nil, errors.New("no such record: no such name")
+		return nil, nil
 	}
 	vv, ok := v[tp]
 	if !ok {
-		return nil, errors.New("no such record: no such type")
+		return nil, nil
 	}
 	return vv, nil
 }

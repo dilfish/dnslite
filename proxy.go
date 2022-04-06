@@ -9,6 +9,9 @@ import (
 )
 
 func IfProxyTls(name string, tp dns.Type) bool {
+    if *FlagAllProxy {
+        return true
+    }
 	mp := make(map[string]bool)
 	mp["dilfish.dev.1"] = true
 	key := name + strconv.FormatUint(uint64(tp), 10)

@@ -80,7 +80,7 @@ func (mc *MongoClient) Find(name string, tp uint16) ([]DNSRecord, error) {
 		log.Println("find one error:", filter, err)
 		return nil, err
 	}
-	return nil, nil
+	return ret, nil
 }
 
 func (mc *MongoClient) Del(name string, tp uint16) error {

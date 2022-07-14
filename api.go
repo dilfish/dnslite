@@ -27,6 +27,7 @@ func (a *ApiHandler) UnjsonRequest(r *http.Request, v interface{}) error {
 type ApiHandler struct {
 	Mux              http.Handler
 	DB               DataManagerI
+	OkMsg            []byte
 	BadRequestMsg    []byte
 	NotSupportedType []byte
 	BadRecordValue   []byte
@@ -37,20 +38,23 @@ type ApiHandler struct {
 
 func NewApiHandler(conf *Config) *ApiHandler {
 	var a ApiHandler
-	m := NewMongoClient(&conf.MongoClientConfig)
-	if m == nil {
+	a.DB = GetGlobalDB(conf)
+	if a.DB == nil {
+		log.Println("db is nil:", conf.UsingMemDB)
 		return nil
-	}
-	a.DB = m
-	if conf.UsingMemDB {
-		a.DB = NewMemDB()
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/add.record", a.AddRecord)
 	mux.HandleFunc("/api/list.record", a.ListRecord)
 	mux.HandleFunc("/api/del.record", a.DelRecord)
+	mux.HandleFunc("/api/add.rcode", a.AddRcode)
+	mux.HandleFunc("/api/del.rcode", a.DelRcode)
 	a.Mux = mux
 	var ret DNSRecord
+	ret.Code = 0
+	ret.Msg = "ok"
+	okMsg, _ := json.Marshal(ret)
+	a.OkMsg = okMsg
 	ret.Code = 1
 	ret.Msg = "bad request"
 	brMsg, _ := json.Marshal(ret)

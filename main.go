@@ -6,15 +6,17 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/miekg/dns"
 )
 
 var FlagUsingMemdb = flag.Bool("m", false, "using memory db")
 var FlagUsingDnsOverTls = flag.Bool("t", false, "using dns over tls")
-var FlagHTTPPort = flag.Int("p", 0, "http port")
+var FlagHTTPPort = flag.Int("p", 10083, "http port")
 var FlagDebugMode = flag.Bool("d", false, "debug mode")
 var FlagAllProxy = flag.Bool("a", false, "all proxy")
+var FlagNoneProxy = flag.Bool("n", false, "none proxy")
 
 // UpDNS create new dns service
 func UpDNS(conf *Config) {
@@ -44,15 +46,17 @@ func main() {
 	conf.DB = "dnslite"
 	conf.Coll = "records"
 	conf.UsingMemDB = *FlagUsingMemdb
+	log.Println("using mem db:", conf.UsingMemDB)
 	if *FlagUsingDnsOverTls {
 		go UpDoT(&conf)
 	}
-	if *FlagHTTPPort != 0 {
-		conf.Port = *FlagHTTPPort
-		go NewHTTPHandler(&conf)
-	}
 	go UpDNS(&conf)
 	api := NewApiHandler(&conf)
-	err := http.ListenAndServe(":8085", api)
+	if api == nil {
+		log.Println("bad api")
+		return
+	}
+	log.Println("listen on:", *FlagHTTPPort)
+	err := http.ListenAndServe(":"+strconv.FormatInt(int64(*FlagHTTPPort), 10), api)
 	panic(err)
 }

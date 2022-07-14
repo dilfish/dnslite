@@ -1,8 +1,22 @@
 package main
 
 import (
+	"log"
 	"sync"
 )
+
+var GlobalDB DataManagerI
+
+func GetGlobalDB(conf *Config) DataManagerI {
+	if GlobalDB == nil {
+		if conf.UsingMemDB {
+			GlobalDB = NewMemDB()
+		} else {
+			GlobalDB = NewMongoClient(&conf.MongoClientConfig)
+		}
+	}
+	return GlobalDB
+}
 
 type MemDB struct {
 	lock sync.Mutex
@@ -16,6 +30,7 @@ func NewMemDB() *MemDB {
 }
 
 func (m *MemDB) Find(name string, tp uint16) (ret []DNSRecord, err error) {
+	log.Println("memdb find:", name, tp)
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	v, ok := m.mp[name]
@@ -26,10 +41,12 @@ func (m *MemDB) Find(name string, tp uint16) (ret []DNSRecord, err error) {
 	if !ok {
 		return nil, nil
 	}
+	log.Println("memdb found:", name, tp, vv)
 	return vv, nil
 }
 
 func (m *MemDB) Insert(r DNSRecord) error {
+	log.Println("memdb insert:", r.Name, r.Type, r)
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	v, ok := m.mp[r.Name]
@@ -39,6 +56,7 @@ func (m *MemDB) Insert(r DNSRecord) error {
 	vv := v[r.Type]
 	vv = append(vv, r)
 	v[r.Type] = vv
+	m.mp[r.Name] = v
 	return nil
 }
 

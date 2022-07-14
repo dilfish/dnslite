@@ -23,9 +23,7 @@ func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
 		w.Write(a.BadRequestMsg)
 		return
 	}
-	if record.Name[len(record.Name)-1] != '.' {
-		record.Name = record.Name + "."
-	}
+	record.Name = dns.Fqdn(record.Name)
 	cf, ok := TypeHandlerList[record.Type]
 	if !ok {
 		log.Println("not supported type:", record.Type)

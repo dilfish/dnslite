@@ -4,6 +4,8 @@
 
 package main
 
+// add record
+//
 // add AAAA record
 // curl -X POST -d '{"name":"dilfish.dev", "type":28, "ttl":100, "value":"2001:470:23:976::2"}' http://127.0.0.1:8085/api/add.record
 // add A record
@@ -20,7 +22,22 @@ package main
 // curl -X POST -d '{"name":"svcb.dilfish.dev","type":64, "svcbAlpn":{"Alpn":["a","b"]},"svcbIPv6Hint":{"Hint":["1::1"]},"svcbIPv4Hint":{"Hint":["1.1.1.1"]},"ttl":100,"svcbPriority":1,"svcbTarget":"dilfish.dev"}' http://127.0.0.1:8085/api/add.record
 
 // get record list
+//
 // curl -X POST -d '{"name":"dilfish.dev","type":1}' http://127.0.0.1:8085/api/list.record
 
 // del a record
+//
 // curl -X POST -d '{"name":"dilfish.dev", "type":1}' http://127.0.0.1:8085/api/del.record
+
+// add an rcode
+//
+// curl -XPOST -d '{"name":"dilfish.dev","rcode":5}'  http://localhost:8085/api/add.rcode
+// curl -XPOST -d '{"name":"dilfish.dev"}' http://localhost:8085/api/del.rcode
+
+// important rcode list
+//	RcodeSuccess        = 0  // NoError   - No Error                          [DNS]
+//	RcodeFormatError    = 1  // FormErr   - Format Error                      [DNS]
+//	RcodeServerFailure  = 2  // ServFail  - Server Failure                    [DNS]
+//	RcodeNameError      = 3  // NXDomain  - Non-Existent Domain               [DNS]
+//	RcodeNotImplemented = 4  // NotImp    - Not Implemented                   [DNS]
+//	RcodeRefused        = 5  // Refused   - Query Refused                     [DNS]

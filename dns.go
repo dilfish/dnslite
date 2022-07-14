@@ -44,7 +44,7 @@ func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	}
 	rcode, msg, err := h.GetRecord(r)
 	if err != nil {
-		h.ServFailMsg.MsgHdr.Rcode = dns.RcodeServerFailure
+		h.ServFailMsg.MsgHdr.Rcode = dns.RcodeNameError
 		if err == ErrRCode {
 			h.ServFailMsg.MsgHdr.Rcode = rcode
 		}

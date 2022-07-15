@@ -3,7 +3,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -44,7 +43,7 @@ func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
 	}
 	conflictList := []uint16{dns.TypeNS, dns.TypeCNAME}
 	for _, tp := range conflictList {
-		// more than one ns records does not conflicts
+		// more than one ns records does not conflict
 		if tp == dns.TypeNS && record.Type == dns.TypeNS {
 			continue
 		}
@@ -62,6 +61,5 @@ func (a *ApiHandler) AddRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	record.Msg = "ok"
-	bt, _ := json.Marshal(record)
-	w.Write(bt)
+	a.JsonResponse(w, record)
 }

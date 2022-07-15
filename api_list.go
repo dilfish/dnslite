@@ -3,7 +3,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -39,6 +38,5 @@ func (a *ApiHandler) ListRecord(w http.ResponseWriter, r *http.Request) {
 	if len(ret) == 0 {
 		ret = make([]DNSRecord, 0)
 	}
-	bt, _ := json.Marshal(ret)
-	w.Write(bt)
+	a.JsonResponse(w, ret)
 }

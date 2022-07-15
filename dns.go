@@ -24,10 +24,10 @@ type Handler struct {
 	ServFailMsg *dns.Msg
 }
 
-func NewHandler(conf *Config) *Handler {
+func NewHandler(conf *Config, db DataManagerI) *Handler {
 	var h Handler
 	h.ServFailMsg = new(dns.Msg)
-	h.M = GetGlobalDB(conf)
+	h.M = db
 	return &h
 }
 

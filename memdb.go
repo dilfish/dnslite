@@ -5,17 +5,15 @@ import (
 	"sync"
 )
 
-var GlobalDB DataManagerI
-
-func GetGlobalDB(conf *Config) DataManagerI {
-	if GlobalDB == nil {
-		if conf.UsingMemDB {
-			GlobalDB = NewMemDB()
-		} else {
-			GlobalDB = NewMongoClient(&conf.MongoClientConfig)
-		}
+func NewDB(conf *Config) DataManagerI {
+	if conf.UsingMemDB {
+		return NewMemDB()
 	}
-	return GlobalDB
+	if *FlagUsingMongo == "" {
+		log.Println("using mongodb but no addr provided")
+		return nil
+	}
+	return NewMongoClient(&conf.MongoClientConfig)
 }
 
 type MemDB struct {

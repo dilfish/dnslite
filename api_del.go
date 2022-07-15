@@ -3,7 +3,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -27,6 +26,5 @@ func (a *ApiHandler) DelRecord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.DB.Del(record.Name, record.Type)
-	bt, _ := json.Marshal(record)
-	w.Write(bt)
+	a.JsonResponse(w, record)
 }

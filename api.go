@@ -24,6 +24,20 @@ func (a *ApiHandler) UnjsonRequest(r *http.Request, v interface{}) error {
 	return nil
 }
 
+func (a *ApiHandler) JsonResponse(w http.ResponseWriter, v interface{}) error {
+	bt, err := json.Marshal(v)
+	if err != nil {
+		log.Println("marshal v error:", v, err)
+		return err
+	}
+	_, err = w.Write(bt)
+	if err != nil {
+		log.Println("write response error:", string(bt), err)
+		return err
+	}
+	return nil
+}
+
 type ApiHandler struct {
 	Mux              http.Handler
 	DB               DataManagerI
@@ -36,13 +50,9 @@ type ApiHandler struct {
 	TypeConflictMsg  []byte
 }
 
-func NewApiHandler(conf *Config) *ApiHandler {
+func NewApiHandler(conf *Config, db DataManagerI) *ApiHandler {
 	var a ApiHandler
-	a.DB = GetGlobalDB(conf)
-	if a.DB == nil {
-		log.Println("db is nil:", conf.UsingMemDB)
-		return nil
-	}
+	a.DB = db
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/add.record", a.AddRecord)
 	mux.HandleFunc("/api/list.record", a.ListRecord)

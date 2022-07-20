@@ -14,10 +14,11 @@ import (
 var FlagUsingMemdb = flag.Bool("m", false, "using memory db")
 var FlagUsingMongo = flag.String("mgo", "", "mongo db addr")
 var FlagUsingDnsOverTls = flag.Bool("t", false, "using dns over tls")
+var FlagProxyTls = flag.Bool("pt", false, "proxy using tls")
 var FlagHTTPPort = flag.Int("p", 10083, "http port")
 var FlagDebugMode = flag.Bool("d", false, "debug mode")
-var FlagAllProxy = flag.Bool("a", false, "all proxy")
 var FlagNoneProxy = flag.Bool("n", false, "none proxy")
+var FlagRcodeNoRecord = flag.Int("rc", dns.RcodeNameError, "no record error rcode")
 
 // UpDNS create new dns service
 func UpDNS(conf *Config, db DataManagerI) {
@@ -47,6 +48,9 @@ func main() {
 	conf.DB = "dnslite"
 	conf.Coll = "records"
 	conf.UsingMemDB = *FlagUsingMemdb
+	if *FlagRcodeNoRecord == 0 {
+		*FlagRcodeNoRecord = dns.RcodeNameError
+	}
 	log.Println("using mem db:", conf.UsingMemDB)
 	db := NewDB(&conf)
 	if db == nil {

@@ -89,11 +89,10 @@ func (h *Handler) GetRecord(req *dns.Msg) (int, *dns.Msg, error) {
 	if len(records) == 0 {
 		if *FlagNoneProxy {
 			log.Println("no record without proxy")
-			return 0, nil, errors.New("no such record")
+			return *FlagRcodeNoRecord, nil, errors.New("no such record")
 		}
 		log.Println("proxy to real dns")
-		usingTls := IfProxyTls(name, tp)
-		return GetDataFromRealDNS(req, usingTls)
+		return GetDataFromRealDNS(req, *FlagProxyTls)
 	}
 	log.Println("find from cache", records)
 	msg := TypeHandlerList[req.Question[0].Qtype].FillRecords(req, records)

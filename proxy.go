@@ -3,23 +3,9 @@ package main
 import (
 	"context"
 	"log"
-	"strconv"
 
 	"github.com/miekg/dns"
 )
-
-func IfProxyTls(name string, tp dns.Type) bool {
-	if *FlagAllProxy {
-		return true
-	}
-	mp := make(map[string]bool)
-	mp["dilfish.dev.1"] = true
-	key := name + strconv.FormatUint(uint64(tp), 10)
-	if _, ok := mp[key]; ok {
-		return true
-	}
-	return false
-}
 
 func GetDataFromRealDNS(req *dns.Msg, withTLS bool) (int, *dns.Msg, error) {
 	dnsMap := map[string]bool{
